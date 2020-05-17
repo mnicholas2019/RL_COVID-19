@@ -13,17 +13,19 @@ class Person:
 		Dead = 5
 	"""
 	#this is a test
-	def __init__(self, age, infected):
+	def __init__(self, id, age, infected):
+		self.id = id
 		self.age = age
 		self.days_infected = 0
 		self.death_rate = 0
 
 
 
+
 		if (infected == True):
-			self.status = 1
+			self.states = 1
 		else:
-			self.status = 0
+			self.states = 0
 
 
 
@@ -61,5 +63,40 @@ class Person:
 		Dead
 	- no update needed
 	"""
-	def update(self, days):
+	def update(self, infected, hospitalized, needs_bed, dead ):
+		# Finite state machine
+		if (self.states == 0): # susceptible
+			if(infected == True):
+				self.states = 1
+				self.days_infected = 0
+		elif (self.states == 1): # contagious
+			if(hospitalized == True):
+				self.states =2
+				self.death_rate = 0.1 #rate1 # value TBD
+			elif(needs_bed ==True): 
+				self.states = 3
+				self.death_rate = 0.1 + 0.2 #rate1 + rate2 # value TBD
+			self.days_infected += 1
+
+		elif (self.states == 2): # hospitalized
+			if(dead==True):
+				self.states = 5
+			elif(self.days_infected == 15 ): #recovery time
+				self.states = 4
+			else:
+				self.days_infected +=1
+		elif (self.states == 3): # needs bed
+			if(dead==True):
+				self.states = 5
+			elif(self.days_infected ==15): # recovery time
+				self.states = 4
+			elif(hospitalized == True):
+				self.states == 2
+				self.days_infected +=1
+			else:
+				self.days_infected +=1
+		elif (self.states == 4): # recovered and immune
+			self.death_rate = 0
+		elif (self.states == 5): # dead
+			self.death_rate = 1
 

@@ -22,7 +22,7 @@ class City:
 		for x in range(num_infected):
 			self.infected_contagious.append(Person(age = 'random age', infected = True))
 
-		for x in range(num_infected - population):
+		for x in range(population - num_infected):
 			self.susceptible.append(Person(age = 'random age', infected = False))
 
 

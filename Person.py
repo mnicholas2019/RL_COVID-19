@@ -12,6 +12,7 @@ class Person:
 		Recovered = 4
 		Dead = 5
 	"""
+	#this is a test
 	def __init__(self, age, infected):
 		self.age = age
 		self.days_infected = 0

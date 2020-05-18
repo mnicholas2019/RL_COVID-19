@@ -191,7 +191,7 @@ class City:
 				self.infected_needs_bed.append(person)
 
 		num_infected_contagious = len(self.infected_contagious)
-		for x in range(num_needs_bed):
+		for x in range(num_infected_contagious):
 			person = self.infected_contagious.popleft()
 			if (person.days_infected == days_till_recovery): # This is just a placeholder. Will use better effect later
 				new_recovered_people.append(person)
@@ -205,7 +205,21 @@ class City:
 
 
 	def determine_hospitalizations(self):
-		return
+		new_needs_beds = []
+		days_till_hosp = 6 # placeholder for now. cmight make this input to city, or disease characteristics or whatever
+		hospitalization_rate = 0.1 # this will eventually be put in Disease class
+
+		num_infected_contagious = len(self.infected_contagious)
+		for x in range(num_infected_contagious):
+			person = self.infected_contagious.popleft()
+			if (person.days_infected == days_till_hosp): # This is just a placeholder. Will use better effect later
+				if (random.random() < hospitalization_rate):
+					new_needs_beds.append(person)
+				else:
+					self.infected_contagious.append(person)
+			else:
+				self.infected_contagious.append(person)
+		return new_needs_beds
 
 
 	def increment_days_infected(self):

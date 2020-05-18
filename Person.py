@@ -28,6 +28,17 @@ class Person:
 			self.state = 0
 
 
+	def infect(self):
+		self.state = 1
+		return
+
+	def die(self):
+		self.state = 5
+		return
+
+	def recover(self):
+		return
+
 
 	"""
 	Runs simulation for x days and updates person accordingly.
@@ -71,7 +82,7 @@ class Person:
 				self.days_infected = 0
 
 
-				
+
 		elif (self.state == 1): # contagious
 			if(hospitalized == True):
 				self.state =2

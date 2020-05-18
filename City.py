@@ -9,10 +9,11 @@ class City:
 	Constructs a city with the given characteristics. We assume that zero are hospitalized at first,
 	zero are dead, zero recovered. 
 	"""
-	def __init__(self, population, area, hospital_beds, num_infected, baseline_transmission_rate):
+	def __init__(self, population, area, hospital_beds, num_infected, baseline_transmission_rate, death_rate):
 		self.population = population # Total population of city
 		self.area = area # Area of the city
 		self.baseline_transmission_rate = transmission_rate #transmission rate of disease w/ no water stations
+		self.death_rate = death_rate
 		self.hospital_beds = hospital_beds # Number of hospital beds
 		self.water_stations = 0 # Water Stations deployed to area
 		self.susceptible = deque # list of susceptible people to disease
@@ -21,6 +22,7 @@ class City:
 		self.infected_needs_bed = deque # List of infected people in need of hospital beds, but don't have access
 		self.recovered = deque # List of recovered people
 		self.dead = deque # List of dead people
+
 
 
 		# create num_infected persons
@@ -126,14 +128,14 @@ class City:
 		tr = self.baseline_transmission_rate * (self.water_stations + 1) # current transmission rate of disease
 
 		new_infected_people = []
+
 		for x in range(num_contacts):
 			person = self.susceptible.popleft()
 			if (random.random() < tr):
-				new_recovered_people.append(person)
+				new_infected_people.append(person)
 			else:
-				self.susceptible.append(person)
-				
-		return
+				self.susceptible.append(person)	
+		return new_infected_people
 
 
 	"""
@@ -143,7 +145,24 @@ class City:
 	If they were hospitalized, free up beds?
 	"""
 	def determine_deaths(self):
-		return
+		new_killed_people = []
+		num_hospitalized = len(self.infected_hospitalized)
+		for x in range(num_hospitalized):
+			person = self.infected_hospitalized.popleft()
+			if (random.random() < person.death_rate):
+				new_killed_people.append(person)
+			else:
+				self.infected_hospitalized.append(person)
+
+		num_needs_bed = len(self.infected_needs_bed)
+		for x in range(num_needs_bed):
+			person = self.infected_needs_bed.popleft()
+			if (random.random() < person.death_rate * 2):
+				new_killed_people.append(person)
+			else:
+				self.infected_needs_bed.append(person)
+				
+		return new_killed_people
 
 	"""
 	If person have been infected for >= 'x' days then they recover.

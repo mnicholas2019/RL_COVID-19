@@ -28,8 +28,9 @@ class Person:
 			self.state = 0
 
 
-	def infect(self):
+	def infect(self, death_rate):
 		self.state = 1
+		self.death_rate = death_rate ## add in age group functionality
 		return
 
 	def die(self):

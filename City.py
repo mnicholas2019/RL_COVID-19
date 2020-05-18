@@ -9,19 +9,23 @@ class City:
 	Constructs a city with the given characteristics. We assume that zero are hospitalized at first,
 	zero are dead, zero recovered. 
 	"""
-	def __init__(self, population, area, hospital_beds, num_infected, baseline_transmission_rate, death_rate):
+	def __init__(self, population, area, hospital_beds, num_infected, disease):
 		self.population = population # Total population of city
 		self.area = area # Area of the city
+
+		self.disease = disease
+
 		self.baseline_transmission_rate = transmission_rate #transmission rate of disease w/ no water stations
 		self.death_rate = death_rate
+
 		self.hospital_beds = hospital_beds # Number of hospital beds
 		self.water_stations = 0 # Water Stations deployed to area
-		self.susceptible = deque # list of susceptible people to disease
-		self.infected_contagious = deque # List of infected, but not hospitalized people
-		self.infected_hospitalized = deque # List of hospitalized people
-		self.infected_needs_bed = deque # List of infected people in need of hospital beds, but don't have access
-		self.recovered = deque # List of recovered people
-		self.dead = deque # List of dead people
+		self.susceptible = deque() # list of susceptible people to disease
+		self.infected_contagious = deque() # List of infected, but not hospitalized people
+		self.infected_hospitalized = deque() # List of hospitalized people
+		self.infected_needs_bed = deque() # List of infected people in need of hospital beds, but don't have access
+		self.recovered = deque() # List of recovered people
+		self.dead = deque() # List of dead people
 
 
 
@@ -63,7 +67,7 @@ class City:
 		"""
 		new_infected_people = determine_infections()
 		for person in new_infected_people:
-			person.infect()
+			person.infect(self.disease.death_rate)
 			self.infected_contagious.append(person)
 
 
@@ -125,7 +129,7 @@ class City:
 		pop_density = self.population/self.area # people per sq km
 		contact_ratio = 0.1 #percentage of people withink sq km you come into contact with
 		num_contacts = math.ceil(pop_density * contact_ratio) # number of people an infected person comes into contact with
-		tr = self.baseline_transmission_rate * (self.water_stations + 1) # current transmission rate of disease
+		tr = self.disease.transmission_rate * (self.water_stations + 1) # current transmission rate of disease
 
 		new_infected_people = []
 
@@ -159,7 +163,7 @@ class City:
 		num_needs_bed = len(self.infected_needs_bed)
 		for x in range(num_needs_bed):
 			person = self.infected_needs_bed.popleft()
-			if (random.random() < person.death_rate * 2): # This is just a placeholder. Will use better effect later
+			if (random.random() < person.death_rate * 2): # should i make this in person or here? will also make more advanced
 				new_killed_people.append(person)
 			else:
 				self.infected_needs_bed.append(person)
@@ -172,7 +176,7 @@ class City:
 	"""
 	def determine_recoveries(self):
 		new_recovered_people = []
-		days_till_recovery = 15 # should I make this input to city? like a disease characteristics vector. placeholder for now
+		days_till_recovery = disease.mean_recovery_time # should I make this input to city? like a disease characteristics vector. placeholder for now
 
 		num_hospitalized = len(self.infected_hospitalized)
 		for x in range(num_hospitalized):
@@ -206,7 +210,7 @@ class City:
 
 	def determine_hospitalizations(self):
 		new_needs_beds = []
-		days_till_hosp = 6 # placeholder for now. cmight make this input to city, or disease characteristics or whatever
+		days_till_hosp = disease.mean_time_to_hosp # placeholder for now. cmight make this input to city, or disease characteristics or whatever
 		hospitalization_rate = 0.1 # this will eventually be put in Disease class
 
 		num_infected_contagious = len(self.infected_contagious)
@@ -223,4 +227,10 @@ class City:
 
 
 	def increment_days_infected(self):
+		for person in self.infected_contagious:
+			person.days_infected += 1
+		for person in self.infected_needs_bed:
+			person.days_infected += 1
+		for person in self.infected_hospitalized:
+			person.days_infected += 1
 		return

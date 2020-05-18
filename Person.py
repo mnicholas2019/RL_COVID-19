@@ -37,6 +37,7 @@ class Person:
 		return
 
 	def recover(self):
+		self.state = 4
 		return
 
 

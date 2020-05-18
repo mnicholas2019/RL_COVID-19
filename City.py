@@ -145,7 +145,9 @@ class City:
 	If they were hospitalized, free up beds?
 	"""
 	def determine_deaths(self):
+
 		new_killed_people = []
+
 		num_hospitalized = len(self.infected_hospitalized)
 		for x in range(num_hospitalized):
 			person = self.infected_hospitalized.popleft()
@@ -157,11 +159,11 @@ class City:
 		num_needs_bed = len(self.infected_needs_bed)
 		for x in range(num_needs_bed):
 			person = self.infected_needs_bed.popleft()
-			if (random.random() < person.death_rate * 2):
+			if (random.random() < person.death_rate * 2): # This is just a placeholder. Will use better effect later
 				new_killed_people.append(person)
 			else:
 				self.infected_needs_bed.append(person)
-				
+
 		return new_killed_people
 
 	"""
@@ -169,7 +171,37 @@ class City:
 	Remove them from respective list and return them. 
 	"""
 	def determine_recoveries(self):
-		return
+		new_recovered_people = []
+		days_till_recovery = 15 # should I make this input to city? like a disease characteristics vector. placeholder for now
+
+		num_hospitalized = len(self.infected_hospitalized)
+		for x in range(num_hospitalized):
+			person = self.infected_hospitalized.popleft()
+			if (person.days_infected == days_till_recovery): ## should I make this input to city? like a disease characteristics vector
+				new_recovered_people.append(person)
+			else:
+				self.infected_hospitalized.append(person)
+
+		num_needs_bed = len(self.infected_needs_bed)
+		for x in range(num_needs_bed):
+			person = self.infected_needs_bed.popleft()
+			if (person.days_infected == days_till_recovery): # This is just a placeholder. Will use better effect later
+				new_recovered_people.append(person)
+			else:
+				self.infected_needs_bed.append(person)
+
+		num_infected_contagious = len(self.infected_contagious)
+		for x in range(num_needs_bed):
+			person = self.infected_contagious.popleft()
+			if (person.days_infected == days_till_recovery): # This is just a placeholder. Will use better effect later
+				new_recovered_people.append(person)
+			else:
+				self.infected_contagious.append(person)
+
+
+
+		return new_recovered_people
+
 
 
 	def determine_hospitalizations(self):

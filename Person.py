@@ -4,7 +4,7 @@ class Person:
 	Initialize Person with given traits.
 	Need a better way to tell what state person is in. Something like Enum in C
 
-	States:
+	states:
 		Susceptible = 0
 		Infected, Contagious = 1
 		Infected, Hospitalized = 2
@@ -23,9 +23,9 @@ class Person:
 
 
 		if (infected == True):
-			self.states = 1
+			self.state = 1
 		else:
-			self.states = 0
+			self.state = 0
 
 
 
@@ -65,38 +65,41 @@ class Person:
 	"""
 	def update(self, infected, hospitalized, needs_bed, dead ):
 		# Finite state machine
-		if (self.states == 0): # susceptible
+		if (self.state == 0): # susceptible
 			if(infected == True):
-				self.states = 1
+				self.state = 1
 				self.days_infected = 0
-		elif (self.states == 1): # contagious
+
+
+				
+		elif (self.state == 1): # contagious
 			if(hospitalized == True):
-				self.states =2
+				self.state =2
 				self.death_rate = 0.1 #rate1 # value TBD
 			elif(needs_bed ==True): 
-				self.states = 3
+				self.state = 3
 				self.death_rate = 0.1 + 0.2 #rate1 + rate2 # value TBD
 			self.days_infected += 1
 
-		elif (self.states == 2): # hospitalized
+		elif (self.state == 2): # hospitalized
 			if(dead==True):
-				self.states = 5
+				self.state = 5
 			elif(self.days_infected == 15 ): #recovery time
-				self.states = 4
+				self.state = 4
 			else:
 				self.days_infected +=1
-		elif (self.states == 3): # needs bed
+		elif (self.state == 3): # needs bed
 			if(dead==True):
-				self.states = 5
+				self.state = 5
 			elif(self.days_infected ==15): # recovery time
-				self.states = 4
+				self.state = 4
 			elif(hospitalized == True):
-				self.states == 2
+				self.state == 2
 				self.days_infected +=1
 			else:
 				self.days_infected +=1
-		elif (self.states == 4): # recovered and immune
+		elif (self.state == 4): # recovered and immune
 			self.death_rate = 0
-		elif (self.states == 5): # dead
+		elif (self.state == 5): # dead
 			self.death_rate = 1
 

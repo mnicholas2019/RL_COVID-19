@@ -9,3 +9,4 @@ class Disease:
 		self.mean_recovery_time = mean_recovery_time
 		self.mean_time_to_hosp = mean_time_to_hosp
 
+

@@ -73,7 +73,8 @@ class City:
 
 		new_infected_people = self.determine_infections()
 		for person in new_infected_people:
-			person.infect(self.disease.hospitalized_death_rate)
+			index = self.disease.get_age_bracket_index(person.age)
+			person.infect(self.disease.death_rate[index])
 			self.infected_contagious.append(person)
 
 
@@ -225,12 +226,13 @@ class City:
 	def determine_hospitalizations(self):
 		new_needs_beds = []
 		days_till_hosp = self.disease.mean_time_to_hosp # placeholder for now. cmight make this input to city, or disease characteristics or whatever
-		hospitalization_rate = self.disease.hospitalization_rate # this will eventually be put in Disease class
 
 		num_infected_contagious = len(self.infected_contagious)
 		for x in range(num_infected_contagious):
 			person = self.infected_contagious.popleft()
 			if (person.days_infected == days_till_hosp): # This is just a placeholder. Will use better effect later
+				index = self.disease.get_age_bracket_index(person.age)
+				hospitalization_rate = self.disease.hospitalization_rate[index]
 				if (random.random() < hospitalization_rate):
 					new_needs_beds.append(person)
 				else:

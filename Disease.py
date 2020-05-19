@@ -1,6 +1,6 @@
 class Disease:
 
-	def __init__(self, transmission_rate = 0.3, death_rate = [0.1, 0.1, 0.1], hospitalization_rate = [0.5, 0.5, 0.5],
+	def __init__(self, transmission_rate = 0.05, death_rate = [0.1, 0.1, 0.1], hospitalization_rate = [0.5, 0.5, 0.5],
 				 mean_recovery_time = 15, mean_time_to_hosp = 6, age_brackets = [0, 50, 75]):
 
 		self.transmission_rate = transmission_rate

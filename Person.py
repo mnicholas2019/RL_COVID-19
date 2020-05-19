@@ -22,8 +22,6 @@ class Person:
 
 
 
-
-
 	def infect(self, disease):
 		self.state = 1
 		index = disease.get_age_bracket_index(self.age)

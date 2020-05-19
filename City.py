@@ -9,7 +9,7 @@ class City:
 	Constructs a city with the given characteristics. We assume that zero are hospitalized at first,
 	zero are dead, zero recovered. 
 	"""
-	def __init__(self, disease, population = 10000, area = 5, hospital_beds = 1000, num_infected = 10):
+	def __init__(self, disease, population = 10000, area = 5, hospital_beds = 10000, num_infected = 10):
 		self.population = population # Total population of city
 		self.area = area # Area of the city
 
@@ -28,11 +28,12 @@ class City:
 
 		# create num_infected persons
 		for x in range(num_infected):
-			self.infected_contagious.append(Person(id = x, age = 10, infected = True))
+			self.infected_contagious.append(Person(id = x, age = random.randint(0, 100), infected = True))
 
 		for x in range(population - num_infected):
-			self.susceptible.append(Person(id = x + num_infected, age = 10, infected = False))
-
+			self.susceptible.append(Person(id = x + num_infected, age = random.randint(0,100), infected = False))
+		for x in range(10):
+			print("age: ", self.susceptible[x].age)
 
 	"""
 	Return the curent state of the city for input into RL model
@@ -137,7 +138,7 @@ class City:
 	and returned in a list
 	"""
 	def determine_infections(self):
-		pop_density = len(self.susceptible)/self.area # people per sq km
+		pop_density = len(self.susceptible)/self.area # susceptible people per sq km
 		contact_ratio = 0.1 #percentage of people withink sq km you come into contact with
 		num_contacts = math.ceil(pop_density * contact_ratio) # number of people an infected person comes into contact with
 		tr = self.disease.transmission_rate * (self.water_stations + 1) # current transmission rate of disease

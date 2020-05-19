@@ -23,7 +23,7 @@ class City:
 		self.infected_needs_bed = deque() # List of infected people in need of hospital beds, but don't have access
 		self.recovered = deque() # List of recovered people
 		self.dead = deque() # List of dead people
-
+		self.possible_spread = 1 # possible for disease to spread in city at the moment?
 
 
 		# create num_infected persons
@@ -49,16 +49,19 @@ class City:
 		lengths.append(len(self.dead))
 		return lengths
 
+
 	"""
 	Adds x beds to hospital capacity
 	"""
-	def dispatch_hospital_bed(self, num_infected):
+	def dispatch_hospital_bed(self, num_beds):
+		self.hosptal_beds += num_beds
 		return
 
 	"""
 	Adds water station to city
 	"""
 	def add_water_station(self):
+		self.water_stations += 1
 		return
 
 	"""
@@ -120,8 +123,9 @@ class City:
 		"""
 		self.increment_days_infected()
 
-		if (len(self.susceptible) + len(self.infected_contagious) + len(self.infected_hospitalized) +
+		if (len(self.infected_contagious) + len(self.infected_hospitalized) +
 			len(self.infected_needs_bed) == 0):
+			self.possible_spread = 0
 			return 0
 
 		"""
@@ -142,7 +146,7 @@ class City:
 		pop_density = len(self.susceptible)/self.area # susceptible people per sq km
 		contact_ratio = 0.0005 #percentage of people withink sq km you come into contact with
 		num_contacts = math.ceil(pop_density * contact_ratio) # number of people an infected person comes into contact with
-		tr = self.disease.transmission_rate * (self.water_stations + 1) # current transmission rate of disease
+		tr = self.disease.transmission_rate / (self.water_stations + 1) # current transmission rate of disease
 		total_contacts = num_contacts * len(self.infected_contagious)
 		potential_infections = min(total_contacts, len(self.susceptible))
 
@@ -154,7 +158,7 @@ class City:
 				new_infected_people.append(person)
 			else:
 				self.susceptible.append(person)	
-		print("New infections this iteration: ", len(new_infected_people), "\ncontacts per infected individuals: ", num_contacts)
+		#print("New infections this iteration: ", len(new_infected_people), "\ncontacts per infected individuals: ", num_contacts)
 		return new_infected_people
 
 
@@ -179,7 +183,7 @@ class City:
 		num_needs_bed = len(self.infected_needs_bed)
 		for x in range(num_needs_bed):
 			person = self.infected_needs_bed.popleft()
-			if (random.random() < person.get_daily_death_rate()): # should i make this in person or here? will also make more advanced
+			if (random.random() < person.get_daily_death_rate()):
 				new_killed_people.append(person)
 			else:
 				self.infected_needs_bed.append(person)

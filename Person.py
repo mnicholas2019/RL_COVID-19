@@ -41,6 +41,21 @@ class Person:
 		self.state = 4
 		return
 
+	def needs_bed(self):
+		self.state = 3
+
+	def hospitalize(self):
+		self.state = 2
+
+	def get_daily_death_rate(self):
+		daily_death_rate = 1 - (((-1) * (self.death_rate - 1)) ** (1./9))
+		if (self.state == 2):
+			return daily_death_rate
+		elif (self.state == 3):
+			return daily_death_rate * 2
+		else:
+			return 0
+
 
 	"""
 	Runs simulation for x days and updates person accordingly.

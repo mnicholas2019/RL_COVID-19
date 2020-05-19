@@ -28,10 +28,12 @@ class City:
 
 		# create num_infected persons
 		for x in range(num_infected):
-			self.infected_contagious.append(Person(id = x, age = random.randint(0, 100), infected = True))
+			person = Person(id = x, age = random.randint(0, 100))
+			person.infect(self.disease)
+			self.infected_contagious.append(person)
 
 		for x in range(population - num_infected):
-			self.susceptible.append(Person(id = x + num_infected, age = random.randint(0,100), infected = False))
+			self.susceptible.append(Person(id = x + num_infected, age = random.randint(0,100)))
 		for x in range(10):
 			print("age: ", self.susceptible[x].age)
 
@@ -73,8 +75,7 @@ class City:
 
 		new_infected_people = self.determine_infections()
 		for person in new_infected_people:
-			index = self.disease.get_age_bracket_index(person.age)
-			person.infect(self.disease.death_rate[index])
+			person.infect(self.disease)
 			self.infected_contagious.append(person)
 
 
@@ -231,9 +232,7 @@ class City:
 		for x in range(num_infected_contagious):
 			person = self.infected_contagious.popleft()
 			if (person.days_infected == days_till_hosp): # This is just a placeholder. Will use better effect later
-				index = self.disease.get_age_bracket_index(person.age)
-				hospitalization_rate = self.disease.hospitalization_rate[index]
-				if (random.random() < hospitalization_rate):
+				if (random.random() < person.hospitalization_rate):
 					new_needs_beds.append(person)
 				else:
 					self.infected_contagious.append(person)

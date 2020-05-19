@@ -13,24 +13,22 @@ class Person:
 		Dead = 5
 	"""
 	#this is a test
-	def __init__(self, id, age, infected):
+	def __init__(self, id, age):
 		self.id = id
 		self.age = age
 		self.days_infected = 0
 		self.death_rate = 0
+		self.hospitalization_rate = 0
 
 
 
 
-		if (infected == True):
-			self.state = 1
-		else:
-			self.state = 0
 
-
-	def infect(self, death_rate):
+	def infect(self, disease):
 		self.state = 1
-		self.death_rate = death_rate ## add in age group functionality
+		index = disease.get_age_bracket_index(self.age)
+		self.death_rate = disease.death_rate[index]
+		self.hospitalization_rate = disease.hospitalization_rate[index]
 		return
 
 	def die(self):
@@ -48,7 +46,7 @@ class Person:
 		self.state = 2
 
 	def get_daily_death_rate(self):
-		daily_death_rate = 1 - (((-1) * (self.death_rate - 1)) ** (1./9))
+		daily_death_rate = 1 - (((-1) * (self.death_rate/self.hospitalization_rate - 1)) ** (1./9))
 		if (self.state == 2):
 			return daily_death_rate
 		elif (self.state == 3):

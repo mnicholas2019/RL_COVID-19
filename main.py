@@ -111,8 +111,8 @@ def run_sim_through():
 	return final_stats
 
 if __name__ == "__main__":
+	
 	final_stats_sim = run_sim_through()
-
 	final_stats_game = play_user_input()
 
 	print("Not infected: ", final_stats_sim[0])

@@ -9,7 +9,7 @@ class City:
 	Constructs a city with the given characteristics. We assume that zero are hospitalized at first,
 	zero are dead, zero recovered. 
 	"""
-	def __init__(self, disease, population = 75000, area = 5, hospital_beds = 75000, num_infected = 10):
+	def __init__(self, disease, population = 75000, area = 5, hospital_beds = 150, num_infected = 10):
 		self.population = population # Total population of city
 		self.area = area # Area of the city
 
@@ -25,6 +25,7 @@ class City:
 		self.dead = deque() # List of dead people
 		self.possible_spread = 1 # possible for disease to spread in city at the moment?
 
+		self.cumulative_days_needing_bed = 0 # days someone has needed bed
 
 		# create num_infected persons
 		for x in range(num_infected):
@@ -40,21 +41,24 @@ class City:
 	Return the curent state of the city for input into RL model
 	"""
 	def get_state(self):
-		lengths = []
-		lengths.append(len(self.susceptible))
-		lengths.append(len(self.infected_contagious))
-		lengths.append(len(self.infected_hospitalized))
-		lengths.append(len(self.infected_needs_bed))
-		lengths.append(len(self.recovered))
-		lengths.append(len(self.dead))
-		return lengths
+		state = []
+		state.append(len(self.susceptible))
+		state.append(len(self.infected_contagious))
+		state.append(len(self.infected_hospitalized))
+		state.append(len(self.infected_needs_bed))
+		state.append(len(self.recovered))
+		state.append(len(self.dead))
+		state.append(self.hospital_beds)
+		state.append(self.water_stations)
+
+		return state
 
 
 	"""
 	Adds x beds to hospital capacity
 	"""
-	def dispatch_hospital_bed(self, num_beds):
-		self.hosptal_beds += num_beds
+	def add_field_hospital(self, num_beds):
+		self.hospital_beds += num_beds
 		return
 
 	"""
@@ -250,6 +254,7 @@ class City:
 			person.days_infected += 1
 		for person in self.infected_needs_bed:
 			person.days_infected += 1
+			self.cumulative_days_needing_bed += 1
 		for person in self.infected_hospitalized:
 			person.days_infected += 1
 		return

@@ -12,6 +12,8 @@ class Region:
 		states = []
 		for city in self.cities:
 			states.append(city.get_state())
+		states.append(self.water_stations)
+		states.append(self.field_hospitals)
 		return states
 
 	def update(self):
@@ -47,3 +49,14 @@ class Region:
 			days_needing_bed += city.cumulative_days_needing_bed
 			# TODO implement total days spent needing bed
 		return num_not_infected, num_recovered, num_dead, days_needing_bed
+
+	def get_reward(self):
+		deaths = 0
+		infections = 0
+		for city in self.cities:
+			deaths += len(city.dead)
+			infections += len(city.infected_contagious)
+			infections += len(city.infected_hospitalized)
+			infections += len(city.infected_needs_bed)
+
+		return (infections + 5*deaths)

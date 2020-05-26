@@ -49,6 +49,7 @@ def play_step_days():
 			print("Day: ", day)
 			status = region.update()
 			print(region.get_state())
+			print("Cost: ", region.get_reward())
 		else:
 			break
 		if (status == 0):
@@ -78,6 +79,7 @@ def play_user_input():
 		print("Day: ", day)
 		status = region.update()
 		print(region.get_state())
+		print("Cost: ", region.get_reward())
 		if (status == 0):
 			break
 
@@ -100,6 +102,7 @@ def run_sim_through():
 		print("Day: ", day)
 		status = region.update()
 		print(region.get_state())
+		print("Cost: ", region.get_reward())
 		if (status == 0):
 			break
 
@@ -109,6 +112,13 @@ def run_sim_through():
 
 
 	return final_stats
+
+def train_agent():
+
+	region = initialize_simulation()
+	day = 0
+	state_size = 8 * len(region.cities) + 2 # state of each city * num cities  + resources left
+
 
 if __name__ == "__main__":
 	

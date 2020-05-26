@@ -1,6 +1,7 @@
 from City import City
 from Disease import Disease
 from Region import Region
+from DQNAgent import DQNAgent
 import sys
 
 
@@ -113,11 +114,43 @@ def run_sim_through():
 
 	return final_stats
 
-def train_agent():
+def train_agent(games):
 
-	region = initialize_simulation()
-	day = 0
-	state_size = 8 * len(region.cities) + 2 # state of each city * num cities  + resources left
+	weights_path = 'training_checkpoints/'
+	agent = DQNAgent()
+	# agent.load(some path)
+
+	game_counter = 0
+	simulation_results = []
+
+	while game_counter < games:
+		day = 0
+		region = initialize_simulation()
+		state = region.get_state()
+		done = 0
+		while 1:
+			state = region.get_state()
+			print("Day: ", day)
+			print(state)
+			action = agent.get_action(state)
+
+			region.take_action(action[0], action[1])
+			status = region.update()
+			#if done, set done to 1
+			new_state = region.get_state
+
+			reward = region.get_reward()
+
+			agent.remember(state, action, reward, next_state, done)
+			#train with some probability for individual and group
+
+			if status == 0:
+				break
+
+		game_counter += 1
+		agent.save(weights_path + game_counter)
+
+
 
 
 if __name__ == "__main__":

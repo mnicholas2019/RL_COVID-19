@@ -1,6 +1,5 @@
 import random
 import numpy as np
-import Region
 from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
@@ -8,6 +7,7 @@ from keras.optimizers import Adam
 from keras import backend as K
 
 import tensorflow as tf
+
 
 class DQNAgent:
 
@@ -21,18 +21,20 @@ class DQNAgent:
 		self.gamma = 0.95 # discount future rewards rate
 		self.learning_rate = 0.001
 		self.model = self.build_model()
+		#self.epsilon_min = 0.01
+        #self.epsilon_decay = 0.99
 
 
 	# initializes the model
 	def build_model(self):
-                model = Sequential()
-                model.add(Dense(output_dim=self.num_parameters, input_dim=self.state_dimensions, activation='relu'))
-                for i in range(num_layers - 2):
-                        model.add(Dense(output_dim=self.num_parameters, activation='relu'))
-                model.add(Dense(output_dim=self.action_dimensions, activation='linear'))
-                model.compile(loss=self._huber_loss,
-                              optimizer=Adam(lr=self.learning_rate))
-                return model
+		model = Sequential()
+		model.add(Dense(units=self.num_parameters, input_dim=self.state_dimensions, activation='relu'))#units is output dimension
+		for i in range(self.num_layers - 2):
+			model.add(Dense(units=self.num_parameters, activation='relu'))
+		model.add(Dense(units=self.action_dimensions, activation='linear'))
+		model.compile(loss='mse',
+			optimizer=Adam(lr=self.learning_rate))
+		return model
 
 
 	# adds [state, action, reward, next_state, done] to memory deque
@@ -44,14 +46,27 @@ class DQNAgent:
 	# is cost function). An action should be [city, action]. 
 	# city should be an integer 1-7 representing one of the cities.
 	# action should be 1 for water station and 2 for field hospital
-	def get_action(self, state)
-                if np.random.rand() <= self.epsilon:
-                    return random.randrange(self.action_dimensions)
-                act_values = self.model.predict(Region.get_state())
-                return np.argmax(act_values[0])  # returns action
+	def get_action(self, state):
+		if np.random.rand() <= self.epsilon:
+			return random.randrange(self.action_dimensions)
+		act_values = self.model.predict(state)
+		return np.argmin(act_values[0])  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
 	def train_batch(self, state, action, reward, next_state, done, batch_size):
+		minibatch = random.sample(self.memory, batch_size)
+		for state, action, reward, next_state, done in minibatch:
+			target = self.model.predict(state)
+			if done:
+				target[0][action] = reward
+			else:
+				# a = self.model.predict(next_state)[0]
+				t = self.model.predict(next_state)[0]
+				target[0][action] = reward + self.gamma * np.amax(t)
+				# target[0][action] = reward + self.gamma * t[np.argmax(a)]
+			self.model.fit(state, target, epochs=1, verbose=0)
+		#if self.epsilon > self.epsilon_min:
+		#	self.epsilon *= self.epsilon_decay
 		return
 
 	# train on specific instance
@@ -60,8 +75,10 @@ class DQNAgent:
 
 	# save the model weights to 'name file path' so it can be loaded later
 	def save_model(self, name):
+		self.model.save_weights(name)
 		return
 
 	# load the model from name file path
 	def load(self, name):
+		self.model.load_weights(name)
 		return

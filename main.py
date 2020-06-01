@@ -141,11 +141,13 @@ def train_agent(games):
 			state = region.get_state()
 			print(state)
 
-			flat_state = np.array(flatten(state))
-			print(flat_state)
-			state = flat_state
+			flat_state = flatten(state)
+			#print(flat_state)
+			transpose = np.reshape(flat_state,(58,))
+			#print(transpose)
+			state = transpose
 			print("Day: ", day)
-			print(state)
+			print(state.shape)
 			action = agent.get_action(state)
 			print(action)
 			region.take_action(action[0], action[1])

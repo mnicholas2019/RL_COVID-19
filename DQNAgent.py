@@ -11,7 +11,7 @@ import tensorflow as tf
 
 class DQNAgent:
 
-	def __init__(self, state_dimensions=1, action_dimensions=2, num_layers=4, num_parameters=75):
+	def __init__(self, state_dimensions=58, action_dimensions=15, num_layers=4, num_parameters=75):
 		self.state_dimensions = state_dimensions
 		self.action_dimensions = action_dimensions
 		self.num_layers = num_layers
@@ -49,10 +49,20 @@ class DQNAgent:
 	# action should be 1 for water station and 2 for field hospital
 	def get_action(self, state):
 		if np.random.rand() <= self.epsilon:
-			return random.randrange(self.action_dimensions)
+			return [random.randrange(1,7),random.randrange(1,3)]
+		print(state)
+		print(state.shape)
 		act_values = self.model.predict(state)
-		print(act_values)
-		return np.argmin(act_values[0])  # returns action
+		print(act_values[0])
+		#0-6 city = 1-7 and action 1 7-13 city = 1-7 and action 2 5 = do nothing
+		index = np.argmin(act_values[0])
+		if (index< 7):
+			action = [index+1, 1] # city , action
+		elif (index < 14):
+			action = [index-6, 2]
+		else:
+			action = [-1, 3]
+		return action  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
 	def train_batch(self, state, action, reward, next_state, done, batch_size):

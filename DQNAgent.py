@@ -74,7 +74,7 @@ class DQNAgent:
 			else:
 				# a = self.model.predict(next_state)[0]
 				t = self.model.predict(next_state)[0]
-				target[0][action] = reward + self.gamma * np.amax(t)
+				target[0][action] = reward + self.gamma * np.amin(t)
 				# target[0][action] = reward + self.gamma * t[np.argmax(a)]
 			self.model.fit(state, target, epochs=1, verbose=0)
 		#if self.epsilon > self.epsilon_min:

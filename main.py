@@ -151,6 +151,7 @@ def train_agent(games):
 
 			# get the new state we are in
 			next_state = region.get_state()
+			next_state = agent.transform_state(next_state)
 
 			# get the reward for the state we are now in. Combination
 			# of deaths and infections at new state
@@ -160,9 +161,15 @@ def train_agent(games):
 			agent.memorize(state, action, reward, next_state, done)
 			#train with some probability for individual and group
 
+			if len(agent.memory > 10):
+				agent.train_batch(state, action, reward, next_state, done, 10)
+
 			if done == 1:
 				break
 			day += 1
+			data = input("proceed to next day? (y/n)\n")
+			if data == 'n':
+				break
 
 		game_counter += 1
 		agent.save_model(weights_path + 'post_game_' + str(game_counter))

@@ -49,12 +49,12 @@ def play_step_days():
 		data = input("proceed to next day? (y/n)\n")
 		if data != 'n':
 			print("Day: ", day)
-			status = region.update()
+			done = region.update()
 			print(region.get_state())
 			print("Cost: ", region.get_reward())
 		else:
 			break
-		if (status == 0):
+		if (done == 1):
 			break
 
 	print("simulation over")
@@ -79,10 +79,10 @@ def play_user_input():
 			city = input("which city? (1-7)")
 			region.take_action(city, action)
 		print("Day: ", day)
-		status = region.update()
+		done = region.update()
 		print(region.get_state())
 		print("Cost: ", region.get_reward())
-		if (status == 0):
+		if (done == 1):
 			break
 
 	print("simulation over")
@@ -102,10 +102,10 @@ def run_sim_through():
 	while 1:
 		day += 1
 		print("Day: ", day)
-		status = region.update()
+		done = region.update()
 		print(region.get_state())
 		print("Cost: ", region.get_reward())
-		if (status == 0):
+		if (done == 1):
 			break
 
 	print("simulation over")
@@ -114,69 +114,66 @@ def run_sim_through():
 
 
 	return final_stats
-def flatten(x):
-    result = []
-    for el in x:
-        if hasattr(el, "__iter__") and not isinstance(el, str):
-            result.extend(flatten(el))
-        else:
-            result.append(el)
-    return result
+
 
 def train_agent(games):
 
 	weights_path = 'training_checkpoints/'
 	agent = DQNAgent()
-	# agent.load(some path)
+
+	# if resuming training load most recent model
+	#agent.load(some path)
 
 	game_counter = 0
 	simulation_results = []
-
+	done = 0
 	while game_counter < games:
 		day = 0
 		region = initialize_simulation()
-		state = region.get_state()
-		done = 0
 		while 1:
+
+			# get human readable state
+			print("\nDay: ", day)
 			state = region.get_state()
 			print(state)
 
-			flat_state = flatten(state)
-			#print(flat_state)
-			transpose = np.reshape(flat_state,(58,))
-			#print(transpose)
-			state = np.reshape(transpose,(1,-1))
-			print("Day: ", day)
-			print(state.shape)
-			action = agent.get_action(state)
-			print(action)
-			region.take_action(str(action[0]), str(action[1]))
-			status = region.update()
-			print(status)
-			#if done, set done to 1
-			next_state = region.get_state()
-			flat_next_state = flatten(next_state)
-			next_transpose = np.reshape(flat_next_state,(58,))
-			next_state = np.reshape(next_transpose,(1,-1))
-			print(next_state)
+			# transform state for input into DQN
+			state = agent.transform_state(state)
 
+			# get action from DQN. Dependent on epsilon
+			action = agent.get_action(state)
+
+			# perform the action and update the state
+			region.take_action(str(action[0]), str(action[1]))
+			done = region.update()
+
+
+			# get the new state we are in
+			next_state = region.get_state()
+
+			# get the reward for the state we are now in. Combination
+			# of deaths and infections at new state
 			reward = region.get_reward()
 
+			# add the 
 			agent.memorize(state, action, reward, next_state, done)
 			#train with some probability for individual and group
 
-			if status == 0:
+			if done == 1:
 				break
+			day += 1
 
 		game_counter += 1
-		agent.save_model(weights_path + str(game_counter))
+		agent.save_model(weights_path + 'post_game_' + str(game_counter))
+		final_stats = region.get_final_stats()
+		return final_stats
 
 
 
 
 if __name__ == "__main__":
-	
-	final_stats_sim = train_agent(2)#run_sim_through()
+	final_stats_sim = run_sim_through()
+	final_stats_agent = train_agent(1)#run_sim_through()
 	#final_stats_game = play_user_input()
 
 	print("Not infected: ", final_stats_sim[0])
@@ -184,9 +181,9 @@ if __name__ == "__main__":
 	print("Dead: ", final_stats_sim[2])
 	print("Cumulative days needing bed: ", final_stats_sim[3])
 
-	print("Not infected: ", final_stats_game[0])
-	print("Recovered: ", final_stats_game[1])
-	print("Dead: ", final_stats_game[2])
-	print("Cumulative days needing bed: ", final_stats_game[3])
+	print("\n\nNot infected: ", final_stats_agent[0])
+	print("Recovered: ", final_stats_agent[1])
+	print("Dead: ", final_stats_agent[2])
+	print("Cumulative days needing bed: ", final_stats_agent[3])
 
 	

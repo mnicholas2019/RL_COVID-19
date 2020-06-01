@@ -1,8 +1,9 @@
 from City import City
+import numpy as np
 
 class Region:
 
-	def __init__(self, cities, water_stations = 4, field_hospitals = 4, field_hospital_capacity = 100):
+	def __init__(self, cities, water_stations = 1000, field_hospitals = 1000, field_hospital_capacity = 100):
 		self.cities = cities
 		self.water_stations = water_stations # number of water stations remaining
 		self.field_hospitals = field_hospitals # number of field hospitals remaining
@@ -16,6 +17,7 @@ class Region:
 		states.append(self.field_hospitals)
 		return states
 
+
 	def update(self):
 		cities_finished = 0
 		for city in self.cities:
@@ -24,8 +26,8 @@ class Region:
 			else:
 				cities_finished += 1
 		if (cities_finished == len(self.cities)):
-			return 0
-		return 1
+			return 1
+		return 0
 
 	def take_action(self, city, action):
 		if (action == '1' and self.water_stations > 0):
@@ -38,6 +40,7 @@ class Region:
 			print("action 2 taken")
 		else:
 			print("no action taken")
+			print("City: ", city, "Action:", action)
 
 	def get_final_stats(self):
 		num_dead = 0

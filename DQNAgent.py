@@ -49,11 +49,11 @@ class DQNAgent:
 	# action should be 1 for water station and 2 for field hospital
 	def get_action(self, state):
 		if np.random.rand() <= self.epsilon:
-			return [random.randrange(1,7),random.randrange(1,3)]
-		print(state)
-		print(state.shape)
+			action = 1
+			return [random.randint(1,7),random.randint(1,3)]
+
 		act_values = self.model.predict(state)
-		print(act_values[0])
+
 		#0-6 city = 1-7 and action 1 7-13 city = 1-7 and action 2 5 = do nothing
 		index = np.argmin(act_values[0])
 		if (index< 7):
@@ -84,6 +84,21 @@ class DQNAgent:
 	# train on specific instance
 	def train_individual(self, state, action, reward, next_state, done):
 		return
+
+	def transform_state(self, state):
+		states = self.flatten_state(state)
+		states = np.reshape(states,(58,))
+		states = np.reshape(states,(1,-1))
+		return states
+
+	def flatten_state(self, state):
+		state_flatten = []
+		for el in state:
+		    if hasattr(el, "__iter__") and not isinstance(el, str):
+		        state_flatten.extend(self.flatten_state(el))
+		    else:
+		        state_flatten.append(el)
+		return state_flatten
 
 	# save the model weights to 'name file path' so it can be loaded later
 	def save_model(self, name):

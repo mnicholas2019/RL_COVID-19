@@ -55,7 +55,7 @@ class Region:
 			days_needing_bed += city.cumulative_days_needing_bed
 			# TODO implement total days spent needing bed
 		return [num_not_infected, num_recovered, num_dead, days_needing_bed, 
-		self.days, self.water_stations, self.field_hospitals]
+		self.days, self.water_stations, self.field_hospitals, self.get_reward()]
 
 	def get_reward(self):
 		deaths = 0

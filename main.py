@@ -156,9 +156,7 @@ def train_agent(games):
 			#if done, set done to 1
 			next_state = region.get_state()
 			flat_next_state = flatten(next_state)
-			#print(flat_state)
 			next_transpose = np.reshape(flat_next_state,(58,))
-			#print(transpose)
 			next_state = np.reshape(next_transpose,(1,-1))
 			print(next_state)
 
@@ -171,7 +169,7 @@ def train_agent(games):
 				break
 
 		game_counter += 1
-		agent.save_model(weights_path + game_counter)
+		agent.save_model(weights_path + str(game_counter))
 
 
 

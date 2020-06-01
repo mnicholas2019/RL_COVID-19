@@ -145,17 +145,22 @@ def train_agent(games):
 			#print(flat_state)
 			transpose = np.reshape(flat_state,(58,))
 			#print(transpose)
-			state = transpose
+			state = np.reshape(transpose,(1,-1))
 			print("Day: ", day)
 			print(state.shape)
 			action = agent.get_action(state)
 			print(action)
-			region.take_action(action[0], action[1])
+			region.take_action(str(action[0]), str(action[1]))
 			status = region.update()
 			print(status)
 			#if done, set done to 1
-			new_state = region.get_state()
-			print(new_state)
+			next_state = region.get_state()
+			flat_next_state = flatten(next_state)
+			#print(flat_state)
+			next_transpose = np.reshape(flat_next_state,(58,))
+			#print(transpose)
+			next_state = np.reshape(next_transpose,(1,-1))
+			print(next_state)
 
 			reward = region.get_reward()
 
@@ -166,7 +171,7 @@ def train_agent(games):
 				break
 
 		game_counter += 1
-		agent.save(weights_path + game_counter)
+		agent.save_model(weights_path + game_counter)
 
 
 

@@ -31,9 +31,11 @@ class Region:
 		if (action == '1' and self.water_stations > 0):
 			self.cities[int(city)-1].add_water_station()
 			self.water_stations = self.water_stations - 1
+			print("action 1 taken")
 		elif (action == '2' and self.field_hospitals > 0):
 			self.cities[int(city)-1].add_field_hospital(self.field_hospital_capacity)
 			self.field_hospitals = self.field_hospitals - 1
+			print("action 2 taken")
 		else:
 			print("no action taken")
 

@@ -3,11 +3,12 @@ import numpy as np
 
 class Region:
 
-	def __init__(self, cities, water_stations = 1000, field_hospitals = 1000, field_hospital_capacity = 100):
+	def __init__(self, cities, water_stations = 4, field_hospitals = 4, field_hospital_capacity = 100):
 		self.cities = cities
 		self.water_stations = water_stations # number of water stations remaining
 		self.field_hospitals = field_hospitals # number of field hospitals remaining
 		self.field_hospital_capacity = field_hospital_capacity
+		self.days = 0
 
 	def get_state(self):
 		states = []
@@ -19,6 +20,7 @@ class Region:
 
 
 	def update(self):
+		self.days += 1
 		cities_finished = 0
 		for city in self.cities:
 			if (city.possible_spread):
@@ -40,7 +42,6 @@ class Region:
 			print("action 2 taken")
 		else:
 			print("no action taken")
-			print("City: ", city, "Action:", action)
 
 	def get_final_stats(self):
 		num_dead = 0
@@ -53,7 +54,7 @@ class Region:
 			num_not_infected += len(city.susceptible)
 			days_needing_bed += city.cumulative_days_needing_bed
 			# TODO implement total days spent needing bed
-		return num_not_infected, num_recovered, num_dead, days_needing_bed
+		return [num_not_infected, num_recovered, num_dead, days_needing_bed, self.days]
 
 	def get_reward(self):
 		deaths = 0

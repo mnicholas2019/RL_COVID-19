@@ -111,6 +111,7 @@ def run_sim_through():
 	print("simulation over")
 
 	final_stats = region.get_final_stats()
+	final_stats.append(region.get_reward)
 
 
 	return final_stats
@@ -166,6 +167,7 @@ def train_agent(games):
 		game_counter += 1
 		agent.save_model(weights_path + 'post_game_' + str(game_counter))
 		final_stats = region.get_final_stats()
+		final_stats.append(region.get_reward())
 		return final_stats
 
 
@@ -176,14 +178,18 @@ if __name__ == "__main__":
 	final_stats_agent = train_agent(1)#run_sim_through()
 	#final_stats_game = play_user_input()
 
+	print("Days of simulation: ", final_stats_sim[4])
 	print("Not infected: ", final_stats_sim[0])
 	print("Recovered: ", final_stats_sim[1])
 	print("Dead: ", final_stats_sim[2])
 	print("Cumulative days needing bed: ", final_stats_sim[3])
+	print("Game score: ", final_stats_sim[5])
 
-	print("\n\nNot infected: ", final_stats_agent[0])
+	print("\n\nDays of simulation: ", final_stats_agent[4])
+	print("Not infected: ", final_stats_agent[0])
 	print("Recovered: ", final_stats_agent[1])
 	print("Dead: ", final_stats_agent[2])
 	print("Cumulative days needing bed: ", final_stats_agent[3])
+	print("Game score: ", final_stats_agent[5])
 
 	

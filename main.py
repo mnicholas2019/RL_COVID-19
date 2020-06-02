@@ -192,29 +192,29 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	results = run_agent(games=100, train=True, model = False, save_model = True)
+	#results = run_agent(games=100, train=True, model = False, save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
 
-	# test_runs = [1, 10, 50, 100, 159]
-	# total_results = []
-	# for x in test_runs:
-	# 	model = 'training_checkpoints/post_game_' + str(x)
-	# 	final_stats_agent = run_agent(games=1, train=False, model = model, save_model= False)
-	# 	total_results.append(final_stats_agent)
+	test_runs = [1, 10, 20, 30, 42]
+	total_results = []
+	for x in test_runs:
+		model = 'training_checkpoints_updated/post_game_' + str(x)
+		final_stats_agent = run_agent(games=1, train=False, model = model, save_model= False)
+		total_results.append(final_stats_agent)
 
-	# for i, results in enumerate(total_results):
-	# 	print("\n\nSimulation for episode:",test_runs[i])
-	# 	print("Days of simulation: ", results[0][4])
-	# 	print("Not infected: ", results[0][0])
-	# 	print("Recovered: ", results[0][1])
-	# 	print("Dead: ", results[0][2])
-	# 	print("Cumulative days needing bed: ", results[0][3])
-	# 	print("Game score: ", results[0][7])
-	# 	print("Water Stations Remaining: ", results[0][5])
-	# 	print("Field Hospitals Remaining: ", results[0][6])
+	for i, results in enumerate(total_results):
+		print("\n\nSimulation for episode:",test_runs[i])
+		print("Days of simulation: ", results[0][4])
+		print("Not infected: ", results[0][0])
+		print("Recovered: ", results[0][1])
+		print("Dead: ", results[0][2])
+		print("Cumulative days needing bed: ", results[0][3])
+		print("Game score: ", results[0][7])
+		print("Water Stations Remaining: ", results[0][5])
+		print("Field Hospitals Remaining: ", results[0][6])
 
 	

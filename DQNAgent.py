@@ -49,21 +49,47 @@ class DQNAgent:
 	# action should be 1 for water station and 2 for field hospital
 	def get_action(self, state, water_stations, field_hospitals):
 		if np.random.rand() <= self.epsilon:
-			action = 1
-			return [random.randint(1,7),random.randint(1,3)]
+			if (water_stations > 0 and field_hospitals > 0):
+				return [random.randint(1,7),random.randint(1,3)]
+			elif (water_stations > 0):
+				action = random.randint(1,2)
+				if action == 1:
+					return[random.randint(1,7), 1]
+			elif (water_stations > 0):
+				return[random.randint(1,7), random.randint(2,3)]
+			else:
+				return[-1, 3]
 
 		act_values = self.model.predict(state)
 
-		#index 0-6 city = 1-7 and action 1 ||||||  7-13 city = 1-7 and action 2 || 14 = do nothing
+		#Index 0-6: city 1-7 and action 1
+		#index 7-13: city 1-7 and action 2 
+		# index = 14 = do nothing
 		index = np.argmin(act_values[0])
 		
+		# first action
 		if (index< 7):
 			if (water_stations > 0):
 				action = [index+1, 1] # city , action
 			else:
-				index = np.argmin(act_values[7:]) + 7????
+				index = np.argmin(act_values[0][7:]) + 7
+				if (index < 14):
+					if field_hospitals > 0:
+						action = [index-6, 2]
+					else:
+						action = [-1,3]
+				else:
+					action = [-1,3]
+
 		elif (index < 14):
-			action = [index-6, 2]
+			if (field_hospitals > 0):
+				action = [index-6, 2]
+			else:
+				index = np.argmin(act_values[0][0:7])
+				if act_values[0][index] < act_values[0][14] and water_stations > 0:
+					action = [index+1, 1]
+				else:
+					action = [-1,3]
 		else:
 			action = [-1, 3]
 		return action  # returns action

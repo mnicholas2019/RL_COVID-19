@@ -47,17 +47,21 @@ class DQNAgent:
 	# is cost function). An action should be [city, action]. 
 	# city should be an integer 1-7 representing one of the cities.
 	# action should be 1 for water station and 2 for field hospital
-	def get_action(self, state):
+	def get_action(self, state, water_stations, field_hospitals):
 		if np.random.rand() <= self.epsilon:
 			action = 1
 			return [random.randint(1,7),random.randint(1,3)]
 
 		act_values = self.model.predict(state)
 
-		#0-6 city = 1-7 and action 1 7-13 city = 1-7 and action 2 5 = do nothing
+		#index 0-6 city = 1-7 and action 1 ||||||  7-13 city = 1-7 and action 2 || 14 = do nothing
 		index = np.argmin(act_values[0])
+		
 		if (index< 7):
-			action = [index+1, 1] # city , action
+			if (water_stations > 0):
+				action = [index+1, 1] # city , action
+			else:
+				index = np.argmin(act_values[7:]) + 7????
 		elif (index < 14):
 			action = [index-6, 2]
 		else:
@@ -66,6 +70,7 @@ class DQNAgent:
 
 	# trains the neural network using batch_size instances. sample randomly from memory
 	def train_batch(self, state, action, reward, next_state, done, batch_size):
+		self.train_individual(state, action, reward, next_state, done)
 		minibatch = random.sample(self.memory, batch_size)
 		for state, action, reward, next_state, done in minibatch:
 			target = self.model.predict(state)
@@ -83,6 +88,15 @@ class DQNAgent:
 
 	# train on specific instance
 	def train_individual(self, state, action, reward, next_state, done):
+		target = self.model.predict(state)
+		if done:
+			target[0][action] = reward
+		else:
+			# a = self.model.predict(next_state)[0]
+			t = self.model.predict(next_state)[0]
+			target[0][action] = reward + self.gamma * np.amin(t)
+			# target[0][action] = reward + self.gamma * t[np.argmax(a)]
+		self.model.fit(state, target, epochs=1, verbose=0)
 		return
 
 	def transform_state(self, state):

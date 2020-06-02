@@ -117,13 +117,16 @@ def run_sim_through():
 	return final_stats
 
 
-def train_agent(games):
+def run_agent(games = 1, train = True, model=False, save_model = True):
 
-	weights_path = 'training_checkpoints/'
+	weights_path = 'training_checkpoints_updated/'
 	agent = DQNAgent()
+	if (train == False):
+		agent.epsilon = 0
 	final_stats = []
-	# if resuming training load most recent model
-	#agent.load(some path)
+	
+	if model != False:
+		agent.load(model)
 
 	game_counter = 0
 	simulation_results = []
@@ -142,7 +145,8 @@ def train_agent(games):
 			state = agent.transform_state(state)
 
 			# get action from DQN. Dependent on epsilon
-			action = agent.get_action(state)
+			action = agent.get_action(state, region.water_stations, region.field_hospitals)
+			print("wanted action: ", action)
 
 			# perform the action and update the state
 			region.take_action(str(action[0]), str(action[1]))
@@ -157,13 +161,12 @@ def train_agent(games):
 			# of deaths and infections at new state
 			reward = region.get_reward()
 
-			# add the 
-			agent.memorize(state, action, reward, next_state, done)
-			#train with some probability for individual and group
-
-			if len(agent.memory) > 10:
+			if len(agent.memory) > 10 and train:
 				agent.train_batch(state, action, reward, next_state, done, 10)
 				print("Training!")
+
+			# add to memory 
+			agent.memorize(state, action, reward, next_state, done)
 
 			if done == 1:
 				break
@@ -173,7 +176,8 @@ def train_agent(games):
 			# 	break
 
 		game_counter += 1
-		agent.save_model(weights_path + 'post_game_' + str(game_counter))
+		if save_model and train:
+			agent.save_model(weights_path + 'post_game_' + str(game_counter))
 		final_stats.append(region.get_final_stats())
 
 	return final_stats
@@ -181,28 +185,36 @@ def train_agent(games):
 
 
 
+
+
 if __name__ == "__main__":
-	# final_stats_sim = run_sim_through()
-	final_stats_agent = train_agent(10)#run_sim_through()
-	#final_stats_game = play_user_input()
 
-	# print("Days of simulation: ", final_stats_sim[4])
-	# print("Not infected: ", final_stats_sim[0])
-	# print("Recovered: ", final_stats_sim[1])
-	# print("Dead: ", final_stats_sim[2])
-	# print("Cumulative days needing bed: ", final_stats_sim[3])
-	# print("Game score: ", final_stats_sim[7])
-	# print("Water Stations Remaining: ", final_stats_sim[5])
-	# print("Field Hospitals Remaining: ", final_stats_sim[6])
+	##################
+	# Training Here
+	##################
+	results = run_agent(games=100, train=True, model = False, save_model = True)
 
-	for i in range(10):
-		print("\n\nDays of simulation: ", final_stats_agent[i][4])
-		print("Not infected: ", final_stats_agent[i][0])
-		print("Recovered: ", final_stats_agent[i][1])
-		print("Dead: ", final_stats_agent[i][2])
-		print("Cumulative days needing bed: ", final_stats_agent[i][3])
-		print("Game score: ", final_stats_agent[i][7])
-		print("Water Stations Remaining: ", final_stats_agent[i][5])
-		print("Field Hospitals Remaining: ", final_stats_agent[i][6])
+
+	####################
+	# Evaluation is here
+	####################
+
+	# test_runs = [1, 10, 50, 100, 159]
+	# total_results = []
+	# for x in test_runs:
+	# 	model = 'training_checkpoints/post_game_' + str(x)
+	# 	final_stats_agent = run_agent(games=1, train=False, model = model, save_model= False)
+	# 	total_results.append(final_stats_agent)
+
+	# for i, results in enumerate(total_results):
+	# 	print("\n\nSimulation for episode:",test_runs[i])
+	# 	print("Days of simulation: ", results[0][4])
+	# 	print("Not infected: ", results[0][0])
+	# 	print("Recovered: ", results[0][1])
+	# 	print("Dead: ", results[0][2])
+	# 	print("Cumulative days needing bed: ", results[0][3])
+	# 	print("Game score: ", results[0][7])
+	# 	print("Water Stations Remaining: ", results[0][5])
+	# 	print("Field Hospitals Remaining: ", results[0][6])
 
 	

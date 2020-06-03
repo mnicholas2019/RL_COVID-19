@@ -97,6 +97,8 @@ class DQNAgent:
 	# trains the neural network using batch_size instances. sample randomly from memory
 	def train_batch(self, state, action, reward, next_state, done, batch_size):
 		self.train_individual(state, action, reward, next_state, done)
+		if (batch_size > len(self.memory)):
+			batch_size = len(self.memory)
 		minibatch = random.sample(self.memory, batch_size)
 		for state, action, reward, next_state, done in minibatch:
 			target = self.model.predict(state)

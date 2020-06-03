@@ -5,6 +5,7 @@ from DQNAgent import DQNAgent
 import sys
 import numpy as np
 import collections
+import matplotlib.pyplot as plt
 
 def initialize_simulation():
 	covid19 = Disease()
@@ -119,7 +120,7 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 
-	weights_path = 'training_checkpoints_updated/'
+	weights_path = 'training_checkpoints_batch_size_200/'
 	agent = DQNAgent()
 	if (train == False):
 		agent.epsilon = 0
@@ -128,12 +129,16 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 	if model != False:
 		agent.load(model)
 
+
+
 	game_counter = 0
 	simulation_results = []
 	done = 0
+	all_moves = []
 	while game_counter < games:
 		day = 0
 		region = initialize_simulation()
+		moves_made = []
 		while 1:
 
 			# get human readable state
@@ -147,6 +152,8 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# get action from DQN. Dependent on epsilon
 			action = agent.get_action(state, region.water_stations, region.field_hospitals)
 			print("wanted action: ", action)
+			if (train == False and action != [-1, 3]):
+				moves_made.append([day, action])
 
 			# perform the action and update the state
 			region.take_action(str(action[0]), str(action[1]))
@@ -161,8 +168,8 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# of deaths and infections at new state
 			reward = region.get_reward()
 
-			if len(agent.memory) > 10 and train:
-				agent.train_batch(state, action, reward, next_state, done, 10)
+			if train:
+				agent.train_batch(state, action, reward, next_state, done, 200)
 				print("Training!")
 
 			# add to memory 
@@ -177,10 +184,10 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 
 		game_counter += 1
 		if save_model and train:
-			agent.save_model(weights_path + 'post_game_' + str(game_counter))
+			agent.save_model(weights_path + 'post_game' + str(game_counter))
 		final_stats.append(region.get_final_stats())
-
-	return final_stats
+		all_moves.append(moves_made)
+	return final_stats, all_moves
 
 
 
@@ -192,20 +199,23 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	#results = run_agent(games=100, train=True, model = False, save_model = True)
+	#results = run_agent(games=300, train=True, model = False, save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
 
-	test_runs = [1, 10, 20, 30, 42]
+	test_runs = [297, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298]
 	total_results = []
-	for x in test_runs:
-		model = 'training_checkpoints_updated/post_game_' + str(x)
-		final_stats_agent = run_agent(games=1, train=False, model = model, save_model= False)
-		total_results.append(final_stats_agent)
+	game_scores = []
+	moves = []
 
+	for x in test_runs:
+		model = 'training_checkpoints_batch_size_200/post_game' + str(x)
+		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
+		total_results.append(final_stats_agent)
+		moves.append(all_moves)
 	for i, results in enumerate(total_results):
 		print("\n\nSimulation for episode:",test_runs[i])
 		print("Days of simulation: ", results[0][4])
@@ -216,5 +226,12 @@ if __name__ == "__main__":
 		print("Game score: ", results[0][7])
 		print("Water Stations Remaining: ", results[0][5])
 		print("Field Hospitals Remaining: ", results[0][6])
+		print("Moves Taken: ", moves[i][0])
+
+		game_scores.append(results[0][7])
+
+
+	plt.plot(test_runs, game_scores)
+	plt.show()
 
 	

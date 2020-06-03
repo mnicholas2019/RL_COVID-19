@@ -144,7 +144,7 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# get human readable state
 			print("\nDay: ", day)
 			state = region.get_state()
-			print(state)
+			region.print_state(state)
 
 			# transform state for input into DQN
 			state = agent.transform_state(state)

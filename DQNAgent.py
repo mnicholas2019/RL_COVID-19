@@ -17,6 +17,7 @@ class DQNAgent:
 		self.num_layers = num_layers
 		self.num_parameters = num_parameters
 		self.memory = deque() 
+		self.action_memory = deque()
 		self.epsilon = 0.25 # exploration rate
 		self.gamma = 0.95 # discount future rewards rate
 		self.learning_rate = 0.001
@@ -39,8 +40,10 @@ class DQNAgent:
 
 	# adds [state, action, reward, next_state, done] to memory deque
 	def memorize(self, state, action, reward, next_state, done):
-		self.memory.append((state, action, reward, next_state, done))
-
+		if (action[1] == 3):
+			self.memory.append([state, action, reward, next_state, done])
+		else:
+			self.action_memory.append([state, action, reward, next_state, done])
 
 	# with probability epsilon returns a random action. With probability
 	# 1 - epsilon return the action with the minimum Q value (since our Q 
@@ -95,23 +98,20 @@ class DQNAgent:
 		return action  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
-	def train_batch(self, state, action, reward, next_state, done, batch_size):
-		self.train_individual(state, action, reward, next_state, done)
+	def train_batch(self, most_recent, batch_size):
+		# sample actions and no actions from memory
 		if (batch_size > len(self.memory)):
 			batch_size = len(self.memory)
 		minibatch = random.sample(self.memory, batch_size)
+		if (batch_size > len(self.action_memory)):
+			batch_size = len(self.action_memory)
+		minibatch2 = random.sample(self.memory, batch_size)
+		minibatch = minibatch + minibatch2
+		minibatch.append(most_recent)
+
+		# train each instance from minibatch
 		for state, action, reward, next_state, done in minibatch:
-			target = self.model.predict(state)
-			if done:
-				target[0][action] = reward
-			else:
-				# a = self.model.predict(next_state)[0]
-				t = self.model.predict(next_state)[0]
-				target[0][action] = reward + self.gamma * np.amin(t)
-				# target[0][action] = reward + self.gamma * t[np.argmax(a)]
-			self.model.fit(state, target, epochs=1, verbose=0)
-		#if self.epsilon > self.epsilon_min:
-		#   self.epsilon *= self.epsilon_decay
+			self.train_individual(state, action, reward, next_state, done)
 		return
 
 	# train on specific instance
@@ -120,10 +120,8 @@ class DQNAgent:
 		if done:
 			target[0][action] = reward
 		else:
-			# a = self.model.predict(next_state)[0]
 			t = self.model.predict(next_state)[0]
 			target[0][action] = reward + self.gamma * np.amin(t)
-			# target[0][action] = reward + self.gamma * t[np.argmax(a)]
 		self.model.fit(state, target, epochs=1, verbose=0)
 		return
 

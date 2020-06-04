@@ -27,6 +27,9 @@ class City:
 
 		self.cumulative_days_needing_bed = 0 # days someone has needed bed
 
+		self.new_infections = 0
+		self.new_deaths = 0
+
 		# create num_infected persons
 		for x in range(num_infected):
 			person = Person(id = x, age = random.randint(0, 100))
@@ -80,6 +83,7 @@ class City:
 		"""
 
 		new_infected_people = self.determine_infections()
+		self.new_infections = len(new_infected_people)
 		for person in new_infected_people:
 			person.infect(self.disease)
 			self.infected_contagious.append(person)
@@ -91,6 +95,7 @@ class City:
 		will die from disease. Kill them if so. Free the beds accordingly
 		"""
 		new_killed_people = self.determine_deaths()
+		self.new_deaths = len(new_killed_people)
 		for person in new_killed_people:
 			person.die()
 			self.dead.append(person)

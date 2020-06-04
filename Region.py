@@ -61,11 +61,10 @@ class Region:
         deaths = 0
         infections = 0
         for city in self.cities:
-            deaths += len(city.dead)
-            infections += len(city.infected_contagious)
-            infections += len(city.infected_hospitalized)
-            infections += len(city.infected_needs_bed)
+            deaths += city.new_deaths
+            infections += city.new_infections
 
+        print("New Infections: ", infections, "New deaths: ", deaths)
         return (infections + 5*deaths)
 
     def print_state(self, state):

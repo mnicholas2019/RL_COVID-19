@@ -120,7 +120,7 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 
-	weights_path = 'training_checkpoints_batch_size_200/'
+	weights_path = 'new_mem_batch_100/'
 	agent = DQNAgent()
 	if (train == False):
 		agent.epsilon = 0
@@ -169,7 +169,7 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			reward = region.get_reward()
 
 			if train:
-				agent.train_batch(state, action, reward, next_state, done, 200)
+				agent.train_batch([state, action, reward, next_state, done], 200)
 				print("Training!")
 
 			# add to memory 
@@ -206,13 +206,13 @@ if __name__ == "__main__":
 	# Evaluation is here
 	####################
 
-	test_runs = [297, 288, 289, 290, 291, 292, 293, 294, 295, 296, 297, 298]
+	test_runs = [1, 3, 5, 7, 10, 12, 14, 15, 17]
 	total_results = []
 	game_scores = []
 	moves = []
 
 	for x in test_runs:
-		model = 'training_checkpoints_batch_size_200/post_game' + str(x)
+		model = 'new_mem_batch_100/post_game' + str(x)
 		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
 		total_results.append(final_stats_agent)
 		moves.append(all_moves)
@@ -223,12 +223,12 @@ if __name__ == "__main__":
 		print("Recovered: ", results[0][1])
 		print("Dead: ", results[0][2])
 		print("Cumulative days needing bed: ", results[0][3])
-		print("Game score: ", results[0][7])
 		print("Water Stations Remaining: ", results[0][5])
 		print("Field Hospitals Remaining: ", results[0][6])
+		print("Game score: ", results[0][1] + results[0][2])
 		print("Moves Taken: ", moves[i][0])
 
-		game_scores.append(results[0][7])
+		game_scores.append(results[0][1] + results[0][2])
 
 
 	plt.plot(test_runs, game_scores)

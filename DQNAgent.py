@@ -18,12 +18,12 @@ class DQNAgent:
 		self.num_parameters = num_parameters
 		self.memory = deque() 
 		self.action_memory = deque()
-		self.epsilon = 0.25 # exploration rate
-		self.gamma = 0.95 # discount future rewards rate
+		self.epsilon = 0.99 # exploration rate
+		self.gamma = 0.99 # discount future rewards rate
 		self.learning_rate = 0.001
 		self.model = self.build_model()
-		#self.epsilon_min = 0.01
-		#self.epsilon_decay = 0.99
+		self.epsilon_min = 0.01
+		self.epsilon_decay = 0.999
 
 
 	# initializes the model
@@ -52,16 +52,20 @@ class DQNAgent:
 	# action should be 1 for water station and 2 for field hospital
 	def get_action(self, state, water_stations, field_hospitals):
 		if np.random.rand() <= self.epsilon:
+			print("Random Action : D")
+			city = random.randint(1,7)
+			action = 3
 			if (water_stations > 0 and field_hospitals > 0):
-				return [random.randint(1,7),random.randint(1,3)]
+				action = random.randint(1,3)
 			elif (water_stations > 0):
-				action = random.randint(1,2)
-				if action == 1:
-					return[random.randint(1,7), 1]
-			elif (water_stations > 0):
-				return[random.randint(1,7), random.randint(2,3)]
-			else:
-				return[-1, 3]
+				action = random.choice([1, 3])
+			elif (field_hospitals > 0):
+				action = random.randint(2,3)
+
+			if action == 3:
+				city = -1
+			return [city, action]
+
 
 		act_values = self.model.predict(state)
 
@@ -69,7 +73,7 @@ class DQNAgent:
 		#index 7-13: city 1-7 and action 2 
 		# index = 14 = do nothing
 		index = np.argmin(act_values[0])
-		
+		print("Values", act_values[0])
 		# first action
 		if (index< 7):
 			if (water_stations > 0):
@@ -98,7 +102,7 @@ class DQNAgent:
 		return action  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
-	def train_batch(self, most_recent, batch_size):
+	def train_batch(self, batch_size):
 		# sample actions and no actions from memory
 		if (batch_size > len(self.memory)):
 			batch_size = len(self.memory)
@@ -107,11 +111,12 @@ class DQNAgent:
 			batch_size = len(self.action_memory)
 		minibatch2 = random.sample(self.memory, batch_size)
 		minibatch = minibatch + minibatch2
-		minibatch.append(most_recent)
 
 		# train each instance from minibatch
 		for state, action, reward, next_state, done in minibatch:
 			self.train_individual(state, action, reward, next_state, done)
+		if self.epsilon >= self.epsilon_min:
+			self.epsilon*=self.epsilon_decay
 		return
 
 	# train on specific instance
@@ -121,6 +126,7 @@ class DQNAgent:
 			target[0][action] = reward
 		else:
 			t = self.model.predict(next_state)[0]
+			print('\n\n\n reward!!!', t)
 			target[0][action] = reward + self.gamma * np.amin(t)
 		self.model.fit(state, target, epochs=1, verbose=0)
 		return

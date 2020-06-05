@@ -22,6 +22,7 @@ class DQNAgent:
 		self.gamma = 0.95 # discount future rewards rate
 		self.learning_rate = 0.001
 		self.model = self.build_model()
+		self.num_cities = int((state_dimensions-2)/8)
 		#self.epsilon_min = 0.01
 		#self.epsilon_decay = 0.99
 
@@ -53,13 +54,13 @@ class DQNAgent:
 	def get_action(self, state, water_stations, field_hospitals):
 		if np.random.rand() <= self.epsilon:
 			if (water_stations > 0 and field_hospitals > 0):
-				return [random.randint(1,7),random.randint(1,3)]
+				return [random.randint(1,self.num_cities),random.randint(1,3)]
 			elif (water_stations > 0):
 				action = random.randint(1,2)
 				if action == 1:
-					return[random.randint(1,7), 1]
+					return[random.randint(1,self.num_cities), 1]
 			elif (water_stations > 0):
-				return[random.randint(1,7), random.randint(2,3)]
+				return[random.randint(1,self.num_cities), random.randint(2,3)]
 			else:
 				return[-1, 3]
 
@@ -71,25 +72,27 @@ class DQNAgent:
 		index = np.argmin(act_values[0])
 		
 		# first action
-		if (index< 7):
+		if (index< self.num_cities):#7):
 			if (water_stations > 0):
 				action = [index+1, 1] # city , action
 			else:
-				index = np.argmin(act_values[0][7:]) + 7
-				if (index < 14):
+				#print(act_values[0][self.num_cities:])
+				index = np.argmin(act_values[0][self.num_cities:]) + self.num_cities
+				#print(index)
+				if (index < 2*self.num_cities):
 					if field_hospitals > 0:
-						action = [index-6, 2]
+						action = [index-self.num_cities-1, 2]
 					else:
 						action = [-1,3]
 				else:
 					action = [-1,3]
 
-		elif (index < 14):
+		elif (index < 2*self.num_cities):
 			if (field_hospitals > 0):
-				action = [index-6, 2]
+				action = [index-self.num_cities-1, 2]
 			else:
-				index = np.argmin(act_values[0][0:7])
-				if act_values[0][index] < act_values[0][14] and water_stations > 0:
+				index = np.argmin(act_values[0][0:self.num_cities])
+				if act_values[0][index] < act_values[0][2*self.num_cities] and water_stations > 0:
 					action = [index+1, 1]
 				else:
 					action = [-1,3]
@@ -122,12 +125,13 @@ class DQNAgent:
 		else:
 			t = self.model.predict(next_state)[0]
 			target[0][action] = reward + self.gamma * np.amin(t)
+			#print("Q:",target[0][action])
 		self.model.fit(state, target, epochs=1, verbose=0)
 		return
 
 	def transform_state(self, state):
 		states = self.flatten_state(state)
-		states = np.reshape(states,(58,))
+		states = np.reshape(states,(self.state_dimensions,))
 		states = np.reshape(states,(1,-1))
 		return states
 

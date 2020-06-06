@@ -101,7 +101,7 @@ class DQNAgent:
 		return action  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
-	def train_batch(self, batch_size):
+	def train_batch(self, batch_size, future_reward = False):
 		# sample actions and no actions from memory
 		if (batch_size > len(self.memory)):
 			batch_size = len(self.memory)
@@ -113,7 +113,7 @@ class DQNAgent:
 
 		# train each instance from minibatch
 		for state, action, reward, next_state, done in minibatch:
-			self.train_individual(state, action, reward, next_state, done)
+			self.train_individual(state, action, reward, next_state, done, future_reward)
 		if self.epsilon >= self.epsilon_min:
 			self.epsilon*=self.epsilon_decay
 		return

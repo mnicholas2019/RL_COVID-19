@@ -157,7 +157,7 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 
-	weights_path = 'throwaway/'
+	weights_path = 'throwaway1/'
 	agent = DQNAgent(num_parameters=75)
 	if (train == False):
 		agent.epsilon = 0
@@ -212,7 +212,7 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			reward = region.get_reward()
 
 			if train:
-				agent.train_individual(state, action, reward, next_state, done)
+				agent.train_individual(state, action, reward, next_state, done, future_reward=True)
 				print("Training!")
 
 			# add to memory 
@@ -223,13 +223,13 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			day += 1
 
 			
-			data = input("proceed to next day? (y/n)\n")
-			if data == 'n':
-				break
+			# data = input("proceed to next day? (y/n)\n")
+			# if data == 'n':
+			# 	break
 
 		game_counter += 1
 		if train:
-			agent.train_batch(400)
+			agent.train_batch(400, future_reward=True)
 			print("training episode")
 		if save_model and train and game_counter%20 == 0:
 			agent.save_model(weights_path + 'post_game' + str(game_counter))
@@ -264,40 +264,40 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	#results = run_agent(games=500, train=True, model = False, save_model = True)
+	results = run_agent(games=500, train=True, model = 'throwaway/post_game140', save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
-	test_runs=[40]
+	# test_runs=[40]
 	# for i in range(5):
 	# 	test_runs.append((i+1))
-	total_results = []
-	game_scores = []
-	moves = []
+	# total_results = []
+	# game_scores = []
+	# moves = []
 
-	for x in test_runs:
-		model = 'throwaway/post_game' + str(x)
-		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
-		total_results.append(final_stats_agent)
-		moves.append(all_moves)
-	for i, results in enumerate(total_results):
-		print("\n\nSimulation for episode:",test_runs[i])
-		print("Days of simulation: ", results[0][4])
-		print("Not infected: ", results[0][0])
-		print("Recovered: ", results[0][1])
-		print("Dead: ", results[0][2])
-		print("Cumulative days needing bed: ", results[0][3])
-		print("Water Stations Remaining: ", results[0][5])
-		print("Field Hospitals Remaining: ", results[0][6])
-		print("Game score: ", results[0][1] + results[0][2])
-		print("Moves Taken: ", moves[i][0])
+	# for x in test_runs:
+	# 	model = 'throwaway/post_game' + str(x)
+	# 	final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
+	# 	total_results.append(final_stats_agent)
+	# 	moves.append(all_moves)
+	# for i, results in enumerate(total_results):
+	# 	print("\n\nSimulation for episode:",test_runs[i])
+	# 	print("Days of simulation: ", results[0][4])
+	# 	print("Not infected: ", results[0][0])
+	# 	print("Recovered: ", results[0][1])
+	# 	print("Dead: ", results[0][2])
+	# 	print("Cumulative days needing bed: ", results[0][3])
+	# 	print("Water Stations Remaining: ", results[0][5])
+	# 	print("Field Hospitals Remaining: ", results[0][6])
+	# 	print("Game score: ", results[0][1] + results[0][2])
+	# 	print("Moves Taken: ", moves[i][0])
 
-		game_scores.append(results[0][1] + results[0][2])
+	# 	game_scores.append(results[0][1] + results[0][2])
 
 
-	plt.plot(test_runs, game_scores)
-	plt.show()
+	# plt.plot(test_runs, game_scores)
+	# plt.show()
 
 	# 

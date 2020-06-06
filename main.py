@@ -24,6 +24,18 @@ def initialize_simulation():
 				 hospital_beds = 60, num_infected = 15)
 	city7 = City(disease = covid19, population = 125000, area = 5, 
 				 hospital_beds = 250, num_infected = 1)
+
+	# city1 = City(disease = covid19, population = 200, area= .005,
+	# 			 hospital_beds = 5, num_infected = 3)
+	# city2 = City(disease = covid19, population = 100, area = .001, 
+	# 			 hospital_beds = 2, num_infected = 2)
+	# city3 = City(disease = covid19, population = 500, area = .01, 
+	# 			 hospital_beds = 2, num_infected = 2)
+	# city4 = City(disease = covid19, population = 75, area = .001, 
+	# 			 hospital_beds = 2, num_infected = 2)
+	# city5 = City(disease = covid19, population = 50, area = .001, 
+	# 			 hospital_beds = 2, num_infected = 2)
+
 	cities.append(city1)
 	cities.append(city2)
 	cities.append(city3)
@@ -61,6 +73,8 @@ def play_step_days():
 	print("simulation over")
 
 	final_stats = region.get_final_stats()
+
+
 
 	return final_stats
 
@@ -100,19 +114,42 @@ def run_sim_through():
 	print("Day: ", day)
 	print(region.get_state())
 
+	susceptible = []
+	infected = []
+	recovered = []
+	dead = []
+
 	while 1:
+		# get current stats
+		stats = region.get_graph_values()
+		susceptible.append(stats[0])
+		infected.append(stats[1])
+		recovered.append(stats[2])
+		dead.append(stats[3])
+
+
 		day += 1
 		print("Day: ", day)
 		done = region.update()
 		print(region.get_state())
 		print("Cost: ", region.get_reward())
-		if (done == 1):
+		if (done):
 			break
 
 	print("simulation over")
 
+	days = []
+	for x in range(day):
+		days.append(x+1)
+	plt.plot(susceptible, label = "susceptible")
+	plt.plot(infected, label = "infected")
+	plt.plot(recovered, label = "recovered")
+	plt.plot(dead, label = "dead")
+	plt.legend()
+
+	# plt.plot(days, susceptible, days, infected, days, recovered, days, dead)
+	plt.show()
 	final_stats = region.get_final_stats()
-	final_stats.append(region.get_reward())
 
 
 	return final_stats
@@ -120,8 +157,8 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 
-	weights_path = 'epsilon_decay3/'
-	agent = DQNAgent(num_parameters=150)
+	weights_path = 'throwaway/'
+	agent = DQNAgent(num_parameters=75)
 	if (train == False):
 		agent.epsilon = 0
 	final_stats = []
@@ -151,13 +188,16 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 
 			# get action from DQN. Dependent on epsilon
 			action = agent.get_action(state, region.water_stations, region.field_hospitals)
+
+			# if (region.water_stations > 0):
+			# 	action = [1,1]
+			# else:
+			# 	action = [-1, 3]
+
 			print("wanted action: ", action)
 			if (train == False and action != [-1, 3]):
 				moves_made.append([day, action])
 
-			data = input("proceed to next day? (y/n)\n")
-			if data == 'n':
-				break
 			# perform the action and update the state
 			region.take_action(str(action[0]), str(action[1]))
 			done = region.update()
@@ -181,15 +221,17 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			if done == 1:
 				break
 			day += 1
-			# data = input("proceed to next day? (y/n)\n")
-			# if data == 'n':
-			# 	break
+
+			
+			data = input("proceed to next day? (y/n)\n")
+			if data == 'n':
+				break
 
 		game_counter += 1
 		if train:
 			agent.train_batch(400)
 			print("training episode")
-		if save_model and train and game_counter%1 == 0:
+		if save_model and train and game_counter%20 == 0:
 			agent.save_model(weights_path + 'post_game' + str(game_counter))
 		final_stats.append(region.get_final_stats())
 		all_moves.append(moves_made)
@@ -202,43 +244,60 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 
 if __name__ == "__main__":
 
+	################
+	# run simulation
+	################
+	# results = run_sim_through()
+
+	# print("Days of simulation: ", results[4])
+	# print("Not infected: ", results[0])
+	# print("Recovered: ", results[1])
+	# print("Dead: ", results[2])
+	# print("Cumulative days needing bed: ", results[3])
+	# print("Water Stations Remaining: ", results[5])
+	# print("Field Hospitals Remaining: ", results[6])
+	# print("Game score: ", results[1] + results[2])
+
+
+
+
 	##################
 	# Training Here
 	##################
-	results = run_agent(games=1000, train=True, model = False, save_model = True)
+	#results = run_agent(games=500, train=True, model = False, save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
-	# test_runs=[]
+	test_runs=[40]
 	# for i in range(5):
-	# 	test_runs.append(10*(i+1))
-	# total_results = []
-	# game_scores = []
-	# moves = []
+	# 	test_runs.append((i+1))
+	total_results = []
+	game_scores = []
+	moves = []
 
-	# for x in test_runs:
-	# 	model = 'epsilon_decay2/post_game' + str(x)
-	# 	final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
-	# 	total_results.append(final_stats_agent)
-	# 	moves.append(all_moves)
-	# for i, results in enumerate(total_results):
-	# 	print("\n\nSimulation for episode:",test_runs[i])
-	# 	print("Days of simulation: ", results[0][4])
-	# 	print("Not infected: ", results[0][0])
-	# 	print("Recovered: ", results[0][1])
-	# 	print("Dead: ", results[0][2])
-	# 	print("Cumulative days needing bed: ", results[0][3])
-	# 	print("Water Stations Remaining: ", results[0][5])
-	# 	print("Field Hospitals Remaining: ", results[0][6])
-	# 	print("Game score: ", results[0][1] + results[0][2])
-	# 	print("Moves Taken: ", moves[i][0])
+	for x in test_runs:
+		model = 'throwaway/post_game' + str(x)
+		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
+		total_results.append(final_stats_agent)
+		moves.append(all_moves)
+	for i, results in enumerate(total_results):
+		print("\n\nSimulation for episode:",test_runs[i])
+		print("Days of simulation: ", results[0][4])
+		print("Not infected: ", results[0][0])
+		print("Recovered: ", results[0][1])
+		print("Dead: ", results[0][2])
+		print("Cumulative days needing bed: ", results[0][3])
+		print("Water Stations Remaining: ", results[0][5])
+		print("Field Hospitals Remaining: ", results[0][6])
+		print("Game score: ", results[0][1] + results[0][2])
+		print("Moves Taken: ", moves[i][0])
 
-	# 	game_scores.append(results[0][1] + results[0][2])
+		game_scores.append(results[0][1] + results[0][2])
 
 
-	# plt.plot(test_runs, game_scores)
-	# plt.show()
+	plt.plot(test_runs, game_scores)
+	plt.show()
 
-	
+	# 

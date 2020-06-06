@@ -82,7 +82,7 @@ class Region:
         return (infections + 5*deaths)
 
     def print_state(self, state):
-        for i, city in enumerate(state[0:7]):
+        for i, city in enumerate(state[0:int(len(self.cities))]):
             print("\nCity", i, ":")
             print("Sus: ", city[0], "Inf:", city[1], "inf_hosp:", city[2], 
                   "needs_bed:", city[3], "rec:", city[4], "dead:", city[5],

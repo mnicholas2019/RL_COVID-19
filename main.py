@@ -39,10 +39,10 @@ def initialize_simulation():
 	cities.append(city1)
 	cities.append(city2)
 	cities.append(city3)
-	cities.append(city4)
-	cities.append(city5)
-	cities.append(city6)
-	cities.append(city7)
+	# cities.append(city4)
+	# cities.append(city5)
+	# cities.append(city6)
+	# cities.append(city7)
 
 	region = Region(cities)
 
@@ -157,8 +157,12 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 
+	num_cities = len(initialize_simulation().cities)
 	weights_path = 'throwaway1/'
-	agent = DQNAgent(num_parameters=75)
+	state_dimensions= int(num_cities*8+2)
+	action_dimensions=int(num_cities*2+1)
+	agent = DQNAgent(state_dimensions=state_dimensions,action_dimensions=action_dimensions,num_parameters=75)
+
 	if (train == False):
 		agent.epsilon = 0
 	final_stats = []
@@ -175,6 +179,7 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 	while game_counter < games:
 		day = 0
 		region = initialize_simulation()
+
 		moves_made = []
 		while 1:
 
@@ -264,7 +269,9 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	results = run_agent(games=500, train=True, model = 'throwaway/post_game140', save_model = True)
+
+	results = run_agent(games=500, train=True, model = False, save_model = True)
+
 
 
 	####################

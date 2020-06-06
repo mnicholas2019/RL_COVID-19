@@ -24,6 +24,7 @@ class DQNAgent:
 		self.model = self.build_model()
 		self.epsilon_min = 0.01
 		self.epsilon_decay = 0.999
+		self.num_cities = int((action_dimensions-1)/2)
 
 
 	# initializes the model
@@ -52,7 +53,7 @@ class DQNAgent:
 	# action should be 1 for water station and 2 for field hospital
 	def get_action(self, state, water_stations, field_hospitals, epsilon_enable = True):
 		if np.random.rand() <= self.epsilon and epsilon_enable:
-			city = random.randint(1,7)
+			city = random.randint(1,self.num_cities)
 			action = 3
 			if (water_stations > 0 and field_hospitals > 0):
 				action = random.randint(1,3)
@@ -74,25 +75,25 @@ class DQNAgent:
 		# index = 14 = do nothing
 		index = np.argmin(act_values[0])
 		# first action
-		if (index< 7):
+		if (index< self.num_cities):
 			if (water_stations > 0):
 				action = [index+1, 1] # city , action
 			else:
-				index = np.argmin(act_values[0][7:]) + 7
-				if (index < 14):
+				index = np.argmin(act_values[0][self.num_cities:]) + self.num_cities
+				if (index < 2*self.num_cities):
 					if field_hospitals > 0:
-						action = [index-6, 2]
+						action = [index-self.num_cities+1, 2]
 					else:
 						action = [-1,3]
 				else:
 					action = [-1,3]
 
-		elif (index < 14):
+		elif (index < 2*self.num_cities):
 			if (field_hospitals > 0):
-				action = [index-6, 2]
+				action = [index-self.num_cities+1, 2]
 			else:
-				index = np.argmin(act_values[0][0:7])
-				if act_values[0][index] < act_values[0][14] and water_stations > 0:
+				index = np.argmin(act_values[0][0:self.num_cities])
+				if act_values[0][index] < act_values[0][2*self.num_cities] and water_stations > 0:
 					action = [index+1, 1]
 				else:
 					action = [-1,3]
@@ -120,9 +121,9 @@ class DQNAgent:
 
 	def action_to_index(self, action):
 		if action[1] == 3:
-			action_index = 14
+			action_index = 2*self.num_cities
 		else:
-			action_index = action[1]*(7) - 8 + action[0]
+			action_index = action[1]*(self.num_cities) - 1-self.num_cities + action[0]
 		return action_index
 
 	# train on specific instance
@@ -153,7 +154,7 @@ class DQNAgent:
 
 	def transform_state(self, state):
 		states = self.flatten_state(state)
-		states = np.reshape(states,(58,))
+		states = np.reshape(states,(self.state_dimensions,))
 		states = np.reshape(states,(1,-1))
 		return states
 

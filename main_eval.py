@@ -12,18 +12,18 @@ def initialize_simulation():
 
 	cities = []
 	city1 = City(disease = covid19)
-	city2 = City(disease = covid19, population = 10000, area = 0.5, 
+	city2 = City(disease = covid19, population = 100000, area = 5, 
 				 hospital_beds = 200, num_infected = 2)
-	city3 = City(disease = covid19, population = 5000, area = 1, 
+	city3 = City(disease = covid19, population = 50000, area = 10, 
 				 hospital_beds = 100, num_infected = 20)
-	city4 = City(disease = covid19, population = 20000, area = 0.8, 
+	city4 = City(disease = covid19, population = 20000, area = 8, 
 				 hospital_beds = 400, num_infected = 3)
-	city5 = City(disease = covid19, population = 20000, area = 3, 
+	city5 = City(disease = covid19, population = 2000, area = 3, 
 				 hospital_beds = 40, num_infected = 10)
-	city6 = City(disease = covid19, population = 30000, area = 6, 
+	city6 = City(disease = covid19, population = 3000, area = 6, 
 				 hospital_beds = 60, num_infected = 15)
-	city7 = City(disease = covid19, population = 125000, area = 5, 
-				 hospital_beds = 250, num_infected = 5)
+	city7 = City(disease = covid19, population = 12500, area = 5, 
+				 hospital_beds = 250, num_infected = 1)
 
 	# city1 = City(disease = covid19, population = 200, area= .005,
 	# 			 hospital_beds = 5, num_infected = 3)
@@ -36,13 +36,13 @@ def initialize_simulation():
 	# city5 = City(disease = covid19, population = 50, area = .001, 
 	# 			 hospital_beds = 2, num_infected = 2)
 
-	cities.append(city1)
-	cities.append(city2)
-	cities.append(city3)
-	# cities.append(city4)
-	# cities.append(city5)
-	# cities.append(city6)
-	# cities.append(city7)
+	# cities.append(city1)
+	# cities.append(city2)
+	# cities.append(city3)
+	cities.append(city4)
+	cities.append(city5)
+	cities.append(city6)
+	cities.append(city7)
 
 	region = Region(cities,10,4)
 
@@ -190,21 +190,7 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			state = agent.transform_state(state)
 
 			# get action from DQN. Dependent on epsilon
-			if (game_counter<20):
-				action = [-1, 3]
-			elif(game_counter<40 and day<(20)):
-				input_1 = input("water station (1), field hospital (2), nothing (3)")
-				print("action", input_1)
-				if input_1 == '1' or input_1 == '2':
-					input_2 = input("which city? (1-7)")
-					action = [int(input_2),int(input_1)]
-				else:
-					action = [-1,3]
-			elif(game_counter<41):
-				agent.epsilon=0.99
-				action = agent.get_action(state, region.water_stations, region.field_hospitals)
-			else:
-				action = agent.get_action(state, region.water_stations, region.field_hospitals)
+			action = agent.get_action(state, region.water_stations, region.field_hospitals)
 
 			# if (region.water_stations > 0):
 			# 	action = [1,1]
@@ -227,10 +213,9 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# get the reward for the state we are now in. Combination
 			# of deaths and infections at new state
 			reward = region.get_reward()
-			print("reward :", reward)
 
 			if train:
-				if game_counter >10:
+				if game_counter >50:
 					future_reward = True
 				else:
 					future_reward = False
@@ -244,10 +229,10 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 				break
 			day += 1
 
-			if game_counter%100 ==0 and day == 20:
-				data = input("proceed to next day? (y/n)\n")
-				if data == 'n':
-					break
+			
+			data = input("proceed to next day? (y/n)\n")
+			if data == 'n':
+				break
 
 		game_counter += 1
 		if train:
@@ -290,40 +275,40 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	 results = run_agent(games=500, train=True, model = False, save_model = True)
+	#  results = run_agent(games=500, train=True, model = False, save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
-	# test_runs=[]
-	# for i in range(25):
+	test_runs=[200]
+	# for i in range(10):
 	# 	test_runs.append(20*(i+1))
-	# total_results = []
-	# game_scores = []
-	# moves = []
+	total_results = []
+	game_scores = []
+	moves = []
 
-	# for x in test_runs:
-	# 	model = 'proportional/post_game' + str(x)
-	# 	final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
-	# 	total_results.append(final_stats_agent)
-	# 	moves.append(all_moves)
-	# for i, results in enumerate(total_results):
-	# 	print("\n\nSimulation for episode:",test_runs[i])
-	# 	print("Days of simulation: ", results[0][4])
-	# 	print("Not infected: ", results[0][0])
-	# 	print("Recovered: ", results[0][1])
-	# 	print("Dead: ", results[0][2])
-	# 	print("Cumulative days needing bed: ", results[0][3])
-	# 	print("Water Stations Remaining: ", results[0][5])
-	# 	print("Field Hospitals Remaining: ", results[0][6])
-	# 	print("Game score: ", results[0][1] + results[0][2])
-	# 	print("Moves Taken: ", moves[i][0])
+	for x in test_runs:
+		model = 'proportional/post_game' + str(x)
+		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
+		total_results.append(final_stats_agent)
+		moves.append(all_moves)
+	for i, results in enumerate(total_results):
+		print("\n\nSimulation for episode:",test_runs[i])
+		print("Days of simulation: ", results[0][4])
+		print("Not infected: ", results[0][0])
+		print("Recovered: ", results[0][1])
+		print("Dead: ", results[0][2])
+		print("Cumulative days needing bed: ", results[0][3])
+		print("Water Stations Remaining: ", results[0][5])
+		print("Field Hospitals Remaining: ", results[0][6])
+		print("Game score: ", results[0][1] + results[0][2])
+		print("Moves Taken: ", moves[i][0])
 
-	# 	game_scores.append(results[0][1] + results[0][2])
+		game_scores.append(results[0][1] + results[0][2])
 
 
-	# plt.plot(test_runs, game_scores)
-	# plt.show()
+	plt.plot(test_runs, game_scores)
+	plt.show()
 
 	

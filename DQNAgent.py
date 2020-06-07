@@ -20,10 +20,11 @@ class DQNAgent:
 		self.action_memory = deque()
 		self.epsilon = 0.99 # exploration rate
 		self.gamma = 0.99 # discount future rewards rate
-		self.learning_rate = 0.001
+		self.learning_rate = 0.0001
 		self.model = self.build_model()
 		self.epsilon_min = 0.01
-		self.epsilon_decay = 0.999
+		self.epsilon_decay = 0.98
+		self.num_cities = int((action_dimensions-1)/2)
 
 
 	# initializes the model
@@ -50,10 +51,10 @@ class DQNAgent:
 	# is cost function). An action should be [city, action]. 
 	# city should be an integer 1-7 representing one of the cities.
 	# action should be 1 for water station and 2 for field hospital
-	def get_action(self, state, water_stations, field_hospitals):
-		if np.random.rand() <= self.epsilon:
-			print("Random Action : D")
-			city = random.randint(1,7)
+	def get_action(self, state, water_stations, field_hospitals, epsilon_enable = True):
+		if np.random.rand() <= self.epsilon and epsilon_enable:
+			print("epsilon action", self.epsilon)
+			city = random.randint(1,self.num_cities)
 			action = 3
 			if (water_stations > 0 and field_hospitals > 0):
 				action = random.randint(1,3)
@@ -68,32 +69,32 @@ class DQNAgent:
 
 
 		act_values = self.model.predict(state)
+		print("Prediction: ", act_values[0])
 
 		#Index 0-6: city 1-7 and action 1
 		#index 7-13: city 1-7 and action 2 
 		# index = 14 = do nothing
 		index = np.argmin(act_values[0])
-		print("Values", act_values[0])
 		# first action
-		if (index< 7):
+		if (index< self.num_cities):
 			if (water_stations > 0):
 				action = [index+1, 1] # city , action
 			else:
-				index = np.argmin(act_values[0][7:]) + 7
-				if (index < 14):
+				index = np.argmin(act_values[0][self.num_cities:]) + self.num_cities
+				if (index < 2*self.num_cities):
 					if field_hospitals > 0:
-						action = [index-6, 2]
+						action = [index-self.num_cities+1, 2]
 					else:
 						action = [-1,3]
 				else:
 					action = [-1,3]
 
-		elif (index < 14):
+		elif (index < 2*self.num_cities):
 			if (field_hospitals > 0):
-				action = [index-6, 2]
+				action = [index-self.num_cities+1, 2]
 			else:
-				index = np.argmin(act_values[0][0:7])
-				if act_values[0][index] < act_values[0][14] and water_stations > 0:
+				index = np.argmin(act_values[0][0:self.num_cities])
+				if act_values[0][index] < act_values[0][2*self.num_cities] and water_stations > 0:
 					action = [index+1, 1]
 				else:
 					action = [-1,3]
@@ -102,38 +103,60 @@ class DQNAgent:
 		return action  # returns action
 
 	# trains the neural network using batch_size instances. sample randomly from memory
-	def train_batch(self, batch_size):
+	def train_batch(self, batch_size,future_reward = False):
 		# sample actions and no actions from memory
 		if (batch_size > len(self.memory)):
 			batch_size = len(self.memory)
 		minibatch = random.sample(self.memory, batch_size)
-		if (batch_size > len(self.action_memory)):
-			batch_size = len(self.action_memory)
-		minibatch2 = random.sample(self.memory, batch_size)
-		minibatch = minibatch + minibatch2
+		minibatch2 = []
+		for x in range(batch_size):
+			if(len(self.action_memory)>0):
+				minibatch.append(random.sample(self.action_memory, 1)[0])
+
 
 		# train each instance from minibatch
 		for state, action, reward, next_state, done in minibatch:
-			self.train_individual(state, action, reward, next_state, done)
+			self.train_individual(state, action, reward, next_state, done, future_reward)
 		if self.epsilon >= self.epsilon_min:
 			self.epsilon*=self.epsilon_decay
 		return
 
+	def action_to_index(self, action):
+		if action[1] == 3:
+			action_index = 2*self.num_cities
+		else:
+			action_index = action[1]*(self.num_cities) - 1-self.num_cities + action[0]
+		return action_index
+
 	# train on specific instance
-	def train_individual(self, state, action, reward, next_state, done):
+	def train_individual(self, state, action, reward, next_state, done, future_reward = False):
+		# convert action to index
+		action_index = self.action_to_index(action)
+
 		target = self.model.predict(state)
+		print("index of action:", action_index)
+		print("Target before: ", target[0][action_index])
 		if done:
-			target[0][action] = reward
+			target[0][action_index] = reward
 		else:
 			t = self.model.predict(next_state)[0]
-			print('\n\n\n reward!!!', t)
-			target[0][action] = reward + self.gamma * np.amin(t)
+			next_action = self.get_action(next_state, next_state[0][-2], next_state[0][-1], epsilon_enable = False)
+			next_action_index = self.action_to_index(next_action)
+			### this is wrong. need to call get action
+			if future_reward:
+				target[0][action_index] = reward + self.gamma * t[next_action_index]
+			else:
+				target[0][action_index] = reward # delete this line later
+		
+		print("target after", target[0][action_index])
 		self.model.fit(state, target, epochs=1, verbose=0)
+		target = self.model.predict(state)
+		print("After training: ", target[0][action_index])
 		return
 
 	def transform_state(self, state):
 		states = self.flatten_state(state)
-		states = np.reshape(states,(58,))
+		states = np.reshape(states,(self.state_dimensions,))
 		states = np.reshape(states,(1,-1))
 		return states
 

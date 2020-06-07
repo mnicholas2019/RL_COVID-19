@@ -35,13 +35,13 @@ class Region:
         if (action == '1' and self.water_stations > 0):
             self.cities[int(city)-1].add_water_station()
             self.water_stations = self.water_stations - 1
-            print("action 1 taken")
+            print("from region action 1 taken")
         elif (action == '2' and self.field_hospitals > 0):
             self.cities[int(city)-1].add_field_hospital(self.field_hospital_capacity)
             self.field_hospitals = self.field_hospitals - 1
-            print("action 2 taken")
+            print("from region action 2 taken")
         else:
-            print("no action taken")
+            print("from region no action taken")
 
     def get_final_stats(self):
         num_dead = 0
@@ -57,6 +57,19 @@ class Region:
         return [num_not_infected, num_recovered, num_dead, days_needing_bed, 
         self.days, self.water_stations, self.field_hospitals, self.get_reward()]
 
+    def get_graph_values(self):
+        sus = 0
+        inf = 0
+        rec = 0 
+        dead = 0
+        for city in self.cities:
+            sus += len(city.susceptible)
+            inf += len(city.infected_contagious) + len(city.infected_hospitalized) + len(city.infected_needs_bed)
+            rec += len(city.recovered)
+            dead += len(city.dead)
+        return [sus, inf, rec, dead]
+
+
     def get_reward(self):
         deaths = 0
         infections = 0
@@ -65,10 +78,11 @@ class Region:
             infections += city.new_infections
 
         print("New Infections: ", infections, "New deaths: ", deaths)
+        print("Reward: ", infections + 5*deaths)
         return (infections + 5*deaths)
 
     def print_state(self, state):
-        for i, city in enumerate(state[0:7]):
+        for i, city in enumerate(state[0:int(len(self.cities))]):
             print("\nCity", i, ":")
             print("Sus: ", city[0], "Inf:", city[1], "inf_hosp:", city[2], 
                   "needs_bed:", city[3], "rec:", city[4], "dead:", city[5],

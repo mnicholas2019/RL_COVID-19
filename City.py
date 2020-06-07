@@ -153,7 +153,7 @@ class City:
 	"""
 	def determine_infections(self):
 		pop_density = len(self.susceptible)/self.area # susceptible people per sq km
-		contact_ratio = 0.0005 #percentage of people withink sq km you come into contact with
+		contact_ratio = 0.0005 #percentage of people within k sq km you come into contact with was 0.0005
 		num_contacts = math.ceil(pop_density * contact_ratio) # number of people an infected person comes into contact with
 		tr = self.disease.transmission_rate / (self.water_stations + 1) # current transmission rate of disease
 		total_contacts = num_contacts * len(self.infected_contagious)

@@ -4,6 +4,7 @@ from collections import deque
 from keras.models import Sequential
 from keras.layers import Dense
 from keras.optimizers import Adam
+from keras.losses import Huber
 from keras import backend as K
 
 import tensorflow as tf
@@ -22,7 +23,7 @@ class DQNAgent:
 		self.gamma = 0.99 # discount future rewards rate
 		self.learning_rate = 0.0001
 		self.model = self.build_model()
-		self.epsilon_min = 0.01
+		self.epsilon_min = 0.1
 		self.epsilon_decay = 0.98
 		self.num_cities = int((action_dimensions-1)/2)
 
@@ -41,7 +42,8 @@ class DQNAgent:
 		for i in range(self.num_layers - 2):
 			model.add(Dense(units=self.num_parameters, activation='relu'))
 		model.add(Dense(units=self.action_dimensions, activation='linear'))
-		model.compile(loss=self.huber_loss,
+
+		model.compile(loss=tf.keras.losses.Huber(),
 			optimizer=Adam(lr=self.learning_rate))
 		return model
 
@@ -62,13 +64,13 @@ class DQNAgent:
 		if np.random.rand() <= self.epsilon and epsilon_enable:
 			print("epsilon action", self.epsilon)
 			city = random.randint(1,self.num_cities)
-			action = 10
+			action = 3
 			if (water_stations > 0 and field_hospitals > 0):
-				action = random.randint(1,10)
+				action = random.randint(1,3)
 			elif (water_stations > 0):
-				action = random.choice([1,3,4,5,6,7,8,9, 10])
+				action = random.choice([1,3])
 			elif (field_hospitals > 0):
-				action = random.randint(2,10)
+				action = random.randint(2,3)
 
 			if action >= 3:
 				action = 3

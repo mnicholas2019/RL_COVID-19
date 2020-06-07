@@ -157,7 +157,7 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 	num_cities = len(initialize_simulation().cities)
-	weights_path = 'proportional_3/'
+	weights_path = 'clip_2/'
 	state_dimensions= int(num_cities*8+2)
 	action_dimensions=int(num_cities*2+1)
 	agent = DQNAgent(state_dimensions=state_dimensions,action_dimensions=action_dimensions,num_parameters=75)
@@ -190,8 +190,8 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			state = agent.transform_state(state)
 
 			# get action from DQN. Dependent on epsilon
-			if (game_counter<20):
-				action = [-1, 3]
+			# if (game_counter<20):
+			# 	action = [-1, 3]
 			# elif(game_counter<40 and day<(20)):
 			# 	input_1 = input("water station (1), field hospital (2), nothing (3)")
 			# 	print("action", input_1)
@@ -203,11 +203,11 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# elif(game_counter<41):
 			# 	agent.epsilon=0.99
 			# 	action = agent.get_action(state, region.water_stations, region.field_hospitals)4
-			elif(game_counter<41):
-				agent.epsilon=0.99
-				action = agent.get_action(state, region.water_stations, region.field_hospitals)
-			else:
-				action = agent.get_action(state, region.water_stations, region.field_hospitals)
+			# elif(game_counter<41):
+			# 	agent.epsilon=0.99
+			# 	action = agent.get_action(state, region.water_stations, region.field_hospitals)
+			# else:
+			action = agent.get_action(state, region.water_stations, region.field_hospitals)
 
 			# if (region.water_stations > 0):
 			# 	action = [1,1]
@@ -233,11 +233,11 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			print("reward :", reward)
 
 			if train:
-				if game_counter >10:
-					future_reward = True
-				else:
-					future_reward = False
-				agent.train_individual(state, action, reward, next_state, done, future_reward)
+				# if game_counter >10:
+					# future_reward = True
+				# else:
+				# 	future_reward = False
+				agent.train_individual(state, action, reward, next_state, done, future_reward=True)
 				print("Training!")
 
 			# add to memory 
@@ -247,17 +247,17 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 				break
 			day += 1
 
-			# if game_counter%100 ==0 and day == 20:
+			# if game_counter%50 ==0 and day < 20:
 			# 	data = input("proceed to next day? (y/n)\n")
 			# 	if data == 'n':
 			# 		break
 
 		game_counter += 1
 		if train:
-			if game_counter >50:
-				future_reward = True
-			else:
-				future_reward = False
+			# if game_counter >50:
+			future_reward = True
+			# else:
+			# 	future_reward = False
 			agent.train_batch(400,future_reward=future_reward)
 			print("training episode")
 		if save_model and train and game_counter%20 == 0:
@@ -293,40 +293,41 @@ if __name__ == "__main__":
 	##################
 	# Training Here
 	##################
-	 results = run_agent(games=500, train=True, model = False, save_model = True)
+	# model = 'proportional_3/post_game160' #+ str(160)
+	# results = run_agent(games=500, train=True, model = False, save_model = True)
 
 
 	####################
 	# Evaluation is here
 	####################
-	# test_runs=[]
-	# for i in range(2):
-	# 	test_runs.append(20*(i+1))
-	# total_results = []
-	# game_scores = []
-	# moves = []
+	test_runs=[]
+	for i in range(25):
+		test_runs.append(20*(i+1))
+	total_results = []
+	game_scores = []
+	moves = []
 
-	# for x in test_runs:
-	# 	model = 'proportional_3/post_game' + str(x)
-	# 	final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
-	# 	total_results.append(final_stats_agent)
-	# 	moves.append(all_moves)
-	# for i, results in enumerate(total_results):
-	# 	print("\n\nSimulation for episode:",test_runs[i])
-	# 	print("Days of simulation: ", results[0][4])
-	# 	print("Not infected: ", results[0][0])
-	# 	print("Recovered: ", results[0][1])
-	# 	print("Dead: ", results[0][2])
-	# 	print("Cumulative days needing bed: ", results[0][3])
-	# 	print("Water Stations Remaining: ", results[0][5])
-	# 	print("Field Hospitals Remaining: ", results[0][6])
-	# 	print("Game score: ", results[0][1] + results[0][2])
-	# 	print("Moves Taken: ", moves[i][0])
+	for x in test_runs:
+		model = 'clip_2/post_game' + str(x)
+		final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
+		total_results.append(final_stats_agent)
+		moves.append(all_moves)
+	for i, results in enumerate(total_results):
+		print("\n\nSimulation for episode:",test_runs[i])
+		print("Days of simulation: ", results[0][4])
+		print("Not infected: ", results[0][0])
+		print("Recovered: ", results[0][1])
+		print("Dead: ", results[0][2])
+		print("Cumulative days needing bed: ", results[0][3])
+		print("Water Stations Remaining: ", results[0][5])
+		print("Field Hospitals Remaining: ", results[0][6])
+		print("Game score: ", results[0][1] + results[0][2])
+		print("Moves Taken: ", moves[i][0])
 
-	# 	game_scores.append(results[0][2]) #results[0][1] + 
+		game_scores.append(results[0][1] + 6*results[0][2]) #results[0][1] + 
 
 
-	# plt.plot(test_runs, game_scores)
-	# plt.show()
+	plt.plot(test_runs, game_scores)
+	plt.show()
 
 	

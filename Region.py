@@ -75,15 +75,15 @@ class Region:
     def get_reward(self):
         deaths = 0
         infections = 0
-        if self.done:
-            for city in self.cities:
-                deaths += len(city.dead)
-                infections += len(city.recovered)
-            infections+=deaths
-        else:
-            for city in self.cities:
-                deaths += city.new_deaths
-                infections += city.new_infections
+        # if self.done:
+        #     for city in self.cities:
+        #         deaths += len(city.dead)
+        #         infections += len(city.recovered)
+        #     infections+=deaths
+        # else:
+        for city in self.cities:
+            deaths += city.new_deaths
+            infections += city.new_infections
 
         print("New Infections: ", infections, "New deaths: ", deaths)
         print("Reward: ", infections + 5*deaths)

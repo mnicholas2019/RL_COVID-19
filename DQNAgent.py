@@ -26,7 +26,14 @@ class DQNAgent:
 		self.epsilon_decay = 0.98
 		self.num_cities = int((action_dimensions-1)/2)
 
+	def huber_loss(self, y_true, y_pred, clip_delta=1.0):
+		error = y_true - y_pred
+		cond  = K.abs(error) <= clip_delta
 
+		squared_loss = 0.5 * K.square(error)
+		quadratic_loss = 0.5 * K.square(clip_delta) + clip_delta * (K.abs(error) - clip_delta)
+
+		return K.mean(tf.where(cond, squared_loss, quadratic_loss))
 	# initializes the model
 	def build_model(self):
 		model = Sequential()
@@ -34,7 +41,7 @@ class DQNAgent:
 		for i in range(self.num_layers - 2):
 			model.add(Dense(units=self.num_parameters, activation='relu'))
 		model.add(Dense(units=self.action_dimensions, activation='linear'))
-		model.compile(loss='mse',
+		model.compile(loss=self.huber_loss,
 			optimizer=Adam(lr=self.learning_rate))
 		return model
 
@@ -55,15 +62,16 @@ class DQNAgent:
 		if np.random.rand() <= self.epsilon and epsilon_enable:
 			print("epsilon action", self.epsilon)
 			city = random.randint(1,self.num_cities)
-			action = 3
+			action = 10
 			if (water_stations > 0 and field_hospitals > 0):
-				action = random.randint(1,3)
+				action = random.randint(1,10)
 			elif (water_stations > 0):
-				action = random.choice([1, 3])
+				action = random.choice([1,3,4,5,6,7,8,9, 10])
 			elif (field_hospitals > 0):
-				action = random.randint(2,3)
+				action = random.randint(2,10)
 
-			if action == 3:
+			if action >= 3:
+				action = 3
 				city = -1
 			return [city, action]
 
@@ -163,10 +171,10 @@ class DQNAgent:
 	def flatten_state(self, state):
 		state_flatten = []
 		for el in state:
-		    if hasattr(el, "__iter__") and not isinstance(el, str):
-		        state_flatten.extend(self.flatten_state(el))
-		    else:
-		        state_flatten.append(el)
+			if hasattr(el, "__iter__") and not isinstance(el, str):
+				state_flatten.extend(self.flatten_state(el))
+			else:
+				state_flatten.append(el)
 		return state_flatten
 
 	# save the model weights to 'name file path' so it can be loaded later

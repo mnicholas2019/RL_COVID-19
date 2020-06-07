@@ -9,6 +9,7 @@ class Region:
         self.field_hospitals = field_hospitals # number of field hospitals remaining
         self.field_hospital_capacity = field_hospital_capacity
         self.days = 0
+        self.done = 0
 
     def get_state(self):
         states = []
@@ -28,6 +29,7 @@ class Region:
             else:
                 cities_finished += 1
         if (cities_finished == len(self.cities)):
+            self.done = 1
             return 1
         return 0
 
@@ -73,9 +75,15 @@ class Region:
     def get_reward(self):
         deaths = 0
         infections = 0
-        for city in self.cities:
-            deaths += city.new_deaths
-            infections += city.new_infections
+        if self.done:
+            for city in self.cities:
+                deaths += len(city.dead)
+                infections += len(city.recovered)
+            infections+=deaths
+        else:
+            for city in self.cities:
+                deaths += city.new_deaths
+                infections += city.new_infections
 
         print("New Infections: ", infections, "New deaths: ", deaths)
         print("Reward: ", infections + 5*deaths)

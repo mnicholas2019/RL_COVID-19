@@ -12,11 +12,11 @@ def initialize_simulation():
 
 	cities = []
 	city1 = City(disease = covid19)
-	city2 = City(disease = covid19, population = 10000, area = 0.5, 
+	city2 = City(disease = covid19, population = 1000, area = 0.015, 
 				 hospital_beds = 200, num_infected = 2)
-	city3 = City(disease = covid19, population = 5000, area = 1, 
+	city3 = City(disease = covid19, population = 500, area = 0.1, 
 				 hospital_beds = 100, num_infected = 20)
-	city4 = City(disease = covid19, population = 20000, area = 0.8, 
+	city4 = City(disease = covid19, population = 2000, area = 0.08, 
 				 hospital_beds = 400, num_infected = 3)
 	city5 = City(disease = covid19, population = 20000, area = 3, 
 				 hospital_beds = 40, num_infected = 10)
@@ -36,10 +36,10 @@ def initialize_simulation():
 	# city5 = City(disease = covid19, population = 50, area = .001, 
 	# 			 hospital_beds = 2, num_infected = 2)
 
-	cities.append(city1)
+	# cities.append(city1)
 	cities.append(city2)
 	cities.append(city3)
-	# cities.append(city4)
+	cities.append(city4)
 	# cities.append(city5)
 	# cities.append(city6)
 	# cities.append(city7)
@@ -157,7 +157,7 @@ def run_sim_through():
 
 def run_agent(games = 1, train = True, model=False, save_model = True):
 	num_cities = len(initialize_simulation().cities)
-	weights_path = 'proportional/'
+	weights_path = 'proportional_3/'
 	state_dimensions= int(num_cities*8+2)
 	action_dimensions=int(num_cities*2+1)
 	agent = DQNAgent(state_dimensions=state_dimensions,action_dimensions=action_dimensions,num_parameters=75)
@@ -192,14 +192,17 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 			# get action from DQN. Dependent on epsilon
 			if (game_counter<20):
 				action = [-1, 3]
-			elif(game_counter<40 and day<(20)):
-				input_1 = input("water station (1), field hospital (2), nothing (3)")
-				print("action", input_1)
-				if input_1 == '1' or input_1 == '2':
-					input_2 = input("which city? (1-7)")
-					action = [int(input_2),int(input_1)]
-				else:
-					action = [-1,3]
+			# elif(game_counter<40 and day<(20)):
+			# 	input_1 = input("water station (1), field hospital (2), nothing (3)")
+			# 	print("action", input_1)
+			# 	if input_1 == '1' or input_1 == '2':
+			# 		input_2 = input("which city? (1-7)")
+			# 		action = [int(input_2),int(input_1)]
+			# 	else:
+			# 		action = [-1,3]
+			# elif(game_counter<41):
+			# 	agent.epsilon=0.99
+			# 	action = agent.get_action(state, region.water_stations, region.field_hospitals)4
 			elif(game_counter<41):
 				agent.epsilon=0.99
 				action = agent.get_action(state, region.water_stations, region.field_hospitals)
@@ -244,10 +247,10 @@ def run_agent(games = 1, train = True, model=False, save_model = True):
 				break
 			day += 1
 
-			if game_counter%100 ==0 and day == 20:
-				data = input("proceed to next day? (y/n)\n")
-				if data == 'n':
-					break
+			# if game_counter%100 ==0 and day == 20:
+			# 	data = input("proceed to next day? (y/n)\n")
+			# 	if data == 'n':
+			# 		break
 
 		game_counter += 1
 		if train:
@@ -297,14 +300,14 @@ if __name__ == "__main__":
 	# Evaluation is here
 	####################
 	# test_runs=[]
-	# for i in range(25):
+	# for i in range(2):
 	# 	test_runs.append(20*(i+1))
 	# total_results = []
 	# game_scores = []
 	# moves = []
 
 	# for x in test_runs:
-	# 	model = 'proportional/post_game' + str(x)
+	# 	model = 'proportional_3/post_game' + str(x)
 	# 	final_stats_agent, all_moves = run_agent(games=1, train=False, model = model, save_model= False)
 	# 	total_results.append(final_stats_agent)
 	# 	moves.append(all_moves)
@@ -320,7 +323,7 @@ if __name__ == "__main__":
 	# 	print("Game score: ", results[0][1] + results[0][2])
 	# 	print("Moves Taken: ", moves[i][0])
 
-	# 	game_scores.append(results[0][1] + results[0][2])
+	# 	game_scores.append(results[0][2]) #results[0][1] + 
 
 
 	# plt.plot(test_runs, game_scores)

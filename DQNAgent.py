@@ -24,7 +24,7 @@ class DQNAgent:
 		self.learning_rate = 0.0001
 		self.model = self.build_model()
 		self.epsilon_min = 0.1
-		self.epsilon_decay = 0.98
+		self.epsilon_decay = 0.99
 		self.num_cities = int((action_dimensions-1)/2)
 
 	def huber_loss(self, y_true, y_pred, clip_delta=1.0):
